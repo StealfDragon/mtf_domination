@@ -1,0 +1,31 @@
+{
+    "name": "mtf_domination",
+    "version": "1.0.0",
+    "description": " Basic adaptation of the game Domination from 1983's Never Say Never Again ",
+    "main": "server.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1",
+      "start": "node server.js"
+    },
+    "repository": {
+      "type": "git",
+      "url": "git+https://https://github.com/StealfDragon/mtf_domination.git"
+    },
+    "keywords": [
+      "Phaser",
+      "Multiplayer",
+      "game",
+      "Node.js",
+      "socket.io"
+    ],
+    "authors": "Cassian Jones, Evan Lara",
+    "license": "MIT",
+    "bugs": {
+      "url": "https://github.com/StealfDragon/mtf_domination/issues"
+    },
+    "homepage": "https://github.com/StealfDragon/mtf_domination#readme",
+    "dependencies": {
+      "express": "^4.15.2",
+      "socket.io": "^1.7.3"
+    }
+}

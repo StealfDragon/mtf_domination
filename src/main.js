@@ -14,4 +14,4 @@ let config = {
 
 let game = new Phaser.Game(config)
 
-let keyFIRE, keyNUKE, keySHIELD, keyMENU, keyLEFT, keyRIGHT
+let keyFIRE, keyNUKE, keySHIELD, keyMENU, keyINTERACT, keyLEFT, keyRIGHT, keyUP, keyDOWN
