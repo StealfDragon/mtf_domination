@@ -6,6 +6,7 @@ class Menu extends Phaser.Scene {
     preload() {
         this.load.image('reticle', './assets/img/TempDominationReticle.png')
         this.load.image('France', './assets/map/TempFrance.png')
+        this.delaunator = 'window.Delaunator';
     }
 
     create() {
@@ -16,6 +17,10 @@ class Menu extends Phaser.Scene {
     }
 
     update() {
-        
+        if (Phaser.Input.Keyboard.JustDown(keyRIGHT)) {
+            console.log(Delaunator);
+            console.log("switching scene")
+            this.scene.start('playScene')
+        }
     }
 }
