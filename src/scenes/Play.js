@@ -1,3 +1,4 @@
+
 class Play extends Phaser.Scene {
     constructor() {
         super("playScene")
@@ -98,12 +99,46 @@ class Play extends Phaser.Scene {
 
         this.triangles = this.triangulateCountry(this.countryOutline);
         this.drawTriangles(this, this.triangles);
+
+        this.reticle = this.add.sprite(400, 300, 'reticle')
+        this.cursors = this.input.keyboard.createCursorKeys()
+        this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
     }
 
     update() {
-        
+        let speed = 5;
+
+    if (this.cursors.left.isDown) {
+        this.reticle.x -= speed;
+    } else if (this.cursors.right.isDown) {
+        this.reticle.x += speed;
     }
 
+    if (this.cursors.up.isDown) {
+        this.reticle.y -= speed;
+    } else if (this.cursors.down.isDown) {
+        this.reticle.y += speed;
+    }
+
+    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+        this.fireReticle()
+    }
+    }
+
+
+    fireReticle() {
+        // Check if the reticle is over a triangle
+        for (let triangle of this.triangles) {
+            if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
+                graphics.fillTriangleShape(triangle);
+                console.log("Fired at triangle:", triangle);
+                break; // Stop after first hit
+            }
+        }
+    }
+
+    
     triangulateCountry(countryOutline) {
         let points = countryOutline.points.map(p => [p.x, p.y]); // Convert Phaser points to array
         let delaunay = Delaunator.from(points);
