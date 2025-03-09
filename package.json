@@ -25,6 +25,7 @@
     },
     "homepage": "https://github.com/StealfDragon/mtf_domination#readme",
     "dependencies": {
+        "delaunator": "^5.0.1",
         "express": "^4.21.2",
         "socket.io": "^4.8.1"
     }
