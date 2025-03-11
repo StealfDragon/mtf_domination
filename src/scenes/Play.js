@@ -9,6 +9,7 @@ class Play extends Phaser.Scene {
 
         const scaleFactor = 0.75; // Adjust this value to make the shape bigger or smaller
 
+        //this is disorganized, but will be in separate file later (thank god)
         this.countryOutline = new Phaser.Geom.Polygon([
             365.96265 * scaleFactor, 232.9695 * scaleFactor,
             347.39003 * scaleFactor, 143.87735 * scaleFactor,
