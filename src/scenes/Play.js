@@ -145,9 +145,9 @@ class Play extends Phaser.Scene {
     }
 
     if (this.cursors.up.isDown) {
-        this.reticle.y -= speed;
+        this.reticle.y -= speed
     } else if (this.cursors.down.isDown) {
-        this.reticle.y += speed;
+        this.reticle.y += speed
     }
 
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
@@ -161,10 +161,10 @@ class Play extends Phaser.Scene {
         // Check if the reticle is over a triangle
         for (let triangle of this.triangles) {
             if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
-                let currentHits = this.triangleHits.get(triangle) || 0;
+                let currentHits = this.triangleHits.get(triangle) || 0
 
                 if (currentHits >= 4) {
-                    console.log("Triangle has already been hit 4 times. No more scoring.");
+                    console.log("Triangle has already been hit 4 times. No more scoring.")
                     return; // Stop further scoring
                 }
 
@@ -173,16 +173,16 @@ class Play extends Phaser.Scene {
 
                 // Give points based on size (example: 10 points per unit of area)
                 let pointsEarned = Math.floor(triangleSize / 10); // Adjust scoring factor if needed
-                this.score += pointsEarned;
+                this.score += pointsEarned
 
                 // Update score text
-                this.scoreText.setText('Score: ' + this.score);
+                this.scoreText.setText('Score: ' + this.score)
                 
                 // Increase hit count
-                this.triangleHits.set(triangle, currentHits + 1);
+                this.triangleHits.set(triangle, currentHits + 1)
 
                 // Change triangle color to indicate it's been hit
-                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
+                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } })
                 graphics.fillTriangleShape(triangle);
 
                 console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
