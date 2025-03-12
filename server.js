@@ -19,7 +19,7 @@ app.get('/', function (req, res) {
 server.lastPlayerID = 0;
 
 server.listen(8081, '0.0.0.0', () => {
-    console.log('Server running on http://100.64.24.19:8081/');
+    console.log('Server running on http://169.233.254.137:8081/');
 });
 
 
