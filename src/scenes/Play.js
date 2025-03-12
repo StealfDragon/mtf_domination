@@ -119,41 +119,44 @@ class Play extends Phaser.Scene {
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
-        this.cameras.main.setBounds(0, 0, 1200, 600); // Adjust based on map size
+        this.cameras.main.setBounds(0, 0, 1200, 630); // Adjust based on map size
         this.cameras.main.setZoom(1)
         // Create a second camera (Reticle Zoom Camera)
-        this.reticleCam = this.cameras.add(800, 0, 500, 600) // Position it on the right
+        this.reticleCam = this.cameras.add(740, 0, 700, 630) // Position it on the right
             .setZoom(3) // Zoom in on the reticle
-            .setBounds(0, 0, 1200, 600)
+            .setBounds(0, 0, 1200, 630)
             .startFollow(this.reticle, true, 0.1, 0.1); // Smooth follow
 
             this.cameras.main.ignore(this.reticle);
 
-            let camBorder = this.add.rectangle(1050, 315, 500, 625, 0x000000).setOrigin(0.5);
-            camBorder.setStrokeStyle(4, 0xffffff); // White border for visibility
+            //let camBorder = this.add.rectangle(1090, 315, 700, 630, 0x000000).setOrigin(0.5);
+            //camBorder.setStrokeStyle(4, 0xffffff); // White border for visibility
         
     }
 
     update() {
         if (!this.cursors) return;
-        let speed = 5;
+        let speed = 3.5;
 
-    if (this.cursors.left.isDown) {
-        this.reticle.x -= speed;
-    } else if (this.cursors.right.isDown) {
-        this.reticle.x += speed;
-    }
-
-    if (this.cursors.up.isDown) {
-        this.reticle.y -= speed
-    } else if (this.cursors.down.isDown) {
-        this.reticle.y += speed
-    }
-
-    if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-        this.fireReticle()
-        this.sound.play('sfx-laser')
-    }
+        let minX = 0
+        let minY = 0
+        let maxX = 700
+        let maxY = 700
+        if(this.reticle.x <= maxX && this.reticle.x > minX && this.reticle.y >= minY && this.reticle.y < maxY) {
+            if (this.cursors.left.isDown) {
+                this.reticle.x -= speed;
+            } if (this.cursors.right.isDown) {
+                this.reticle.x += speed;
+            } if (this.cursors.up.isDown) {
+                this.reticle.y -= speed;
+            } if (this.cursors.down.isDown) {
+                this.reticle.y += speed;
+            }
+        }
+        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            this.fireReticle()
+            this.sound.play('sfx-laser')
+        }
     }
 
 
