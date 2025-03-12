@@ -3,6 +3,13 @@ class Menu extends Phaser.Scene {
         super("Menu");
     }
 
+    preload() {
+        this.load.image('reticle', './assets/img/TempDominationReticle.png')
+        //Sound Effect by <a href="https://pixabay.com/users/ribhavagrawal-39286533/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Ribhav Agrawal</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Pixabay</a>
+        this.load.audio('sfx-laser', './assets/audio/sfx-laser.mp3')
+        this.delaunator = 'window.Delaunator';
+    }
+
     create() {
         this.playerNumber = null; // Will be assigned later
         this.isReady = false;
@@ -16,6 +23,7 @@ class Menu extends Phaser.Scene {
                 fontSize: "24px",
                 fill: "#ffffff"
             }).setOrigin(0.5);
+            console.log("Should've loaded the text by now")
         });
 
         // Listen for ready signal
@@ -29,7 +37,7 @@ class Menu extends Phaser.Scene {
             if (!this.isReady) {
                 this.isReady = true;
                 socket.emit('playerReady');
-                this.readyText.setText("Waiting for Player 2...");
+                this.readyText.setText("Waiting for other Player...");
             }
         });
     }
