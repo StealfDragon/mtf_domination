@@ -12,6 +12,9 @@ let config = {
     scene: [ Menu, Play ]
 }
 
+//const socket = io()
+//let players = {}
+
 let game = new Phaser.Game(config)
 
 let keyFIRE, keyNUKE, keySHIELD, keyMENU, keyINTERACT, keyLEFT, keyRIGHT, keyUP, keyDOWN
