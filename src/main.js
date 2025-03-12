@@ -7,7 +7,7 @@ Domination
 
 let config = {
     type: Phaser.AUTO,
-    width: 720,
+    width: 1300,
     height: 630,
     scene: [ Menu, Play ]
 }

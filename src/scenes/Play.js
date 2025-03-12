@@ -96,17 +96,46 @@ class Play extends Phaser.Scene {
         ]);
         
         this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
-        this.graphics.strokePoints(this.countryOutline.points, true);
+        this.graphics.strokePoints(this.countryOutline.points, true)
 
-        this.triangles = this.triangulateCountry(this.countryOutline);
-        this.drawTriangles(this, this.triangles);
+        this.triangles = this.triangulateCountry(this.countryOutline)
+        this.drawTriangles(this, this.triangles)
+
+        //initialize score and score text
+        this.score = 0
+        this.scoreText = this.add.text(20, 20, 'Score: 0', {
+            fontSize: '24px',
+            fill: '#ffffff'
+        })
+        this.scoreText.setScrollFactor(0)
+
+         // Add a hit counter to each triangle
+        this.triangleHits = new window.Map(); // Store hit counts
+
+        this.triangles.forEach(triangle => {
+            this.triangleHits.set(triangle, 0); // Initialize hit count
+    });
 
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
+        this.cameras.main.setBounds(0, 0, 1200, 600); // Adjust based on map size
+        this.cameras.main.setZoom(1)
+        // Create a second camera (Reticle Zoom Camera)
+        this.reticleCam = this.cameras.add(800, 0, 500, 600) // Position it on the right
+            .setZoom(3) // Zoom in on the reticle
+            .setBounds(0, 0, 1200, 600)
+            .startFollow(this.reticle, true, 0.1, 0.1); // Smooth follow
+
+            this.cameras.main.ignore(this.reticle);
+
+            let camBorder = this.add.rectangle(1050, 315, 500, 625, 0x000000).setOrigin(0.5);
+            camBorder.setStrokeStyle(4, 0xffffff); // White border for visibility
+        
     }
 
     update() {
+        if (!this.cursors) return;
         let speed = 5;
 
     if (this.cursors.left.isDown) {
@@ -123,6 +152,7 @@ class Play extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
         this.fireReticle()
+        this.sound.play('sfx-laser')
     }
     }
 
@@ -131,10 +161,33 @@ class Play extends Phaser.Scene {
         // Check if the reticle is over a triangle
         for (let triangle of this.triangles) {
             if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+                let currentHits = this.triangleHits.get(triangle) || 0;
+
+                if (currentHits >= 4) {
+                    console.log("Triangle has already been hit 4 times. No more scoring.");
+                    return; // Stop further scoring
+                }
+
+                // Calculate the triangle's size (area)
+                let triangleSize = Phaser.Geom.Triangle.Area(triangle);
+
+                // Give points based on size (example: 10 points per unit of area)
+                let pointsEarned = Math.floor(triangleSize / 10); // Adjust scoring factor if needed
+                this.score += pointsEarned;
+
+                // Update score text
+                this.scoreText.setText('Score: ' + this.score);
+                
+                // Increase hit count
+                this.triangleHits.set(triangle, currentHits + 1);
+
+                // Change triangle color to indicate it's been hit
                 let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
                 graphics.fillTriangleShape(triangle);
-                console.log("Fired at triangle:", triangle);
-                break; // Stop after first hit
+
+                console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
+
+                break; // Stop after hitting one triangle
             }
         }
     }
