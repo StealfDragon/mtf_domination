@@ -151,6 +151,7 @@ class Play extends Phaser.Scene {
 
     if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
         this.fireReticle()
+        this.sound.play('sfx-laser')
     }
     }
 
