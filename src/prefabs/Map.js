@@ -1,3 +1,4 @@
+/*
 class Map extends Phaser.GameObjects.Sprite {
     constructor() {
         super()
@@ -7,3 +8,4 @@ class Map extends Phaser.GameObjects.Sprite {
 
     }
 }
+    */

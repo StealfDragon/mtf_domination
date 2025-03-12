@@ -1,59 +1,70 @@
 var express = require('express');
+var http = require('http');
+var socketIo = require('socket.io');
+
 var app = express();
-var server = require('http').Server(app);
-var io = require('socket.io').listen(server);
+var server = http.createServer(app);
+var io = socketIo(server); // Corrected initialization
 
-app.use('/css',express.static(__dirname + '/css'));
-app.use('/js',express.static(__dirname + '/js'));
-app.use('/assets',express.static(__dirname + '/assets'));
+app.use('/css', express.static(__dirname + '/css'));
+app.use('/js', express.static(__dirname + '/js'));
+app.use('/assets', express.static(__dirname + '/assets'));
+app.use('/src', express.static(__dirname + '/src'));
+app.use('/lib', express.static(__dirname + '/lib'));
 
-app.get('/',function(req,res){
-    res.sendFile(__dirname+'/index.html');
+app.get('/', function (req, res) {
+    res.sendFile(__dirname + '/index.html');
 });
 
-server.lastPlayderID = 0;
+server.lastPlayerID = 0;
 
-server.listen(process.env.PORT || 8081,function(){
-    console.log('Listening on '+server.address().port);
+server.listen(8081, '0.0.0.0', () => {
+    console.log('Server running on http://100.64.24.19:8081/');
 });
 
-io.on('connection',function(socket){
 
-    socket.on('newplayer',function(){
-        socket.player = {
-            id: server.lastPlayderID++,
-            x: randomInt(100,400),
-            y: randomInt(100,400)
-        };
-        socket.emit('allplayers',getAllPlayers());
-        socket.broadcast.emit('newplayer',socket.player);
+let players = { 1: null, 2: null }; // Track two player slots
+let readyPlayers = 0;
 
-        socket.on('click',function(data){
-            console.log('click to '+data.x+', '+data.y);
-            socket.player.x = data.x;
-            socket.player.y = data.y;
-            io.emit('move',socket.player);
-        });
+io.on('connection', (socket) => {
+    console.log(`Player connected: ${socket.id}`);
 
-        socket.on('disconnect',function(){
-            io.emit('remove',socket.player.id);
-        });
+    // Assign the returning player to their original slot
+    let playerNumber = null;
+    if (!players[1]) {
+        playerNumber = 1;
+    } else if (!players[2]) {
+        playerNumber = 2;
+    }
+
+    if (!playerNumber) {
+        socket.emit('full', { message: "Game is full!" });
+        return;
+    }
+
+    players[playerNumber] = { id: socket.id, ready: false, playerNumber };
+    socket.emit('assignPlayerNumber', playerNumber); // Tell client which player they are
+
+    socket.on('playerReady', () => {
+        if (!players[playerNumber]) return;
+
+        players[playerNumber].ready = true;
+        readyPlayers++;
+
+        console.log(`Player ${socket.id} is ready! (${readyPlayers}/2)`);
+
+        if (readyPlayers === 2) {
+            io.emit('startGame'); // Start the game for both players
+            console.log("Both players are ready! Starting the game...");
+        }
     });
 
-    socket.on('test',function(){
-        console.log('test received');
+    // Handle player disconnecting
+    socket.on('disconnect', () => {
+        console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
+        if (players[playerNumber] && players[playerNumber].ready) {
+            readyPlayers--;
+        }
+        players[playerNumber] = null; // Free the slot for rejoining players
     });
 });
-
-function getAllPlayers(){
-    var players = [];
-    Object.keys(io.sockets.connected).forEach(function(socketID){
-        var player = io.sockets.connected[socketID].player;
-        if(player) players.push(player);
-    });
-    return players;
-}
-
-function randomInt (low, high) {
-    return Math.floor(Math.random() * (high - low) + low);
-}
