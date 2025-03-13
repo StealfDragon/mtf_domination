@@ -1,1 +1,2 @@
-const socket = io();
+const io = require('socket.io-client');
+const socket = io('https://domination-jl.onrender.com/');

@@ -18,9 +18,16 @@ app.get('/', function (req, res) {
 
 server.lastPlayerID = 0;
 
+const PORT = process.env.PORT || 3000;
+server.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});
+
+/*
 server.listen(8081, '0.0.0.0', () => {
     console.log('Server running on http://100.64.24.19:8081/');
 });
+*/
 
 
 let players = { 1: null, 2: null }; // Track two player slots
