@@ -17,14 +17,36 @@ class Menu extends Phaser.Scene {
         socket.on('assignPlayerNumber', (num) => {
             this.playerNumber = num;
             console.log(`You are Player ${num}`);
+        
+            let text = (num === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+            console.log("Received Player Number, setting text:", text);
+        
+            if (this.readyText) {
+                this.readyText.setText(text);
+            } else {
+                this.readyText = this.add.text(400, 300, text, {
+                    fontSize: "24px",
+                    fill: "#ffffff"
+                }).setOrigin(0.5);
+            }
+        
+            //console.log("Text should be visible now:", this.readyText);
+        });
+
+        /*
+        socket.on('assignPlayerNumber', (num) => {
+            this.playerNumber = num;
+            console.log(`You are Player ${num}`);
             
             let text = (num === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+            console.log("Created text (not readyText)")
             this.readyText = this.add.text(400, 300, text, {
                 fontSize: "24px",
                 fill: "#ffffff"
             }).setOrigin(0.5);
             console.log("Should've loaded the text by now")
         });
+        */
 
         // Listen for ready signal
         socket.on('startGame', () => {
@@ -39,6 +61,14 @@ class Menu extends Phaser.Scene {
                 socket.emit('playerReady');
                 this.readyText.setText("Waiting for other Player...");
             }
+        });
+
+        socket.on('full', () => {
+            console.log("Game is full! Redirecting...");
+            this.add.text(400, 300, "Game is full. Please wait.", {
+                fontSize: "24px",
+                fill: "#ff0000"
+            }).setOrigin(0.5);
         });
     }
 }
