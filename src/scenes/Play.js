@@ -151,7 +151,7 @@ class Play extends Phaser.Scene {
         });
 
         socket.on('moveReticle', (data) => {
-            if (this.reticles[data.id]) {
+            if (data.id !== socket.id && this.reticles[data.id]) {
                 this.reticles[data.id].x = data.x;
                 this.reticles[data.id].y = data.y;
             }
@@ -177,7 +177,7 @@ class Play extends Phaser.Scene {
         });
 
         // Create the reticle for THIS player
-        this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
+        // this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
 
         // Capture mouse movement & update reticle position
         this.input.on('pointermove', (pointer) => {
@@ -188,6 +188,7 @@ class Play extends Phaser.Scene {
             }
         });
 
+        /*
         socket.on('newplayer', () => {
             if (!players[1] || !players[2]) {
                 socket.emit('allplayers', players);
@@ -196,6 +197,7 @@ class Play extends Phaser.Scene {
                 socket.emit('full', { message: "Game is full!" });
             }
         });
+        */
     }
 
     update() {
@@ -304,8 +306,10 @@ class Play extends Phaser.Scene {
     }
 
     addPlayer(id, playerData) {
+        if (this.reticles[id]) return;
+
         // Add player & reticle when a new player joins
-        this.players[id] = this.add.sprite(playerData.x, playerData.y, 'player');
+        // this.players[id] = this.add.sprite(playerData.x, playerData.y, 'player');
         this.reticles[id] = this.add.image(playerData.x, playerData.y, 'reticle');
     }
 }
