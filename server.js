@@ -66,6 +66,14 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('moveReticle', (data) => {
+        io.emit('moveReticle', data); // Broadcast movement to all players
+    });
+
+    socket.on('hitTriangle', (data) => {
+        io.emit('hitTriangle', data);
+    });
+
     socket.on('disconnect', () => {
         console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
         if (players[playerNumber] && players[playerNumber].ready) {
@@ -73,37 +81,4 @@ io.on('connection', (socket) => {
         }
         players[playerNumber] = null; // Free the slot for rejoining players
     });
-
-    /*
-    if (!playerNumber) {
-        socket.emit('full', { message: "Game is full!" });
-        return;
-    }
-    
-    players[playerNumber] = { id: socket.id, ready: false, playerNumber };
-    socket.emit('assignPlayerNumber', playerNumber); // Tell client which player they are
-
-    socket.on('playerReady', () => {
-        if (!players[playerNumber]) return;
-
-        players[playerNumber].ready = true;
-        readyPlayers++;
-
-        console.log(`Player ${socket.id} is ready! (${readyPlayers}/2)`);
-
-        if (readyPlayers === 2) {
-            io.emit('startGame'); // Start the game for both players
-            console.log("Both players are ready! Starting the game...");
-        }
-    });
-
-    // Handle player disconnecting
-    socket.on('disconnect', () => {
-        console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
-        if (players[playerNumber] && players[playerNumber].ready) {
-            readyPlayers--;
-        }
-        players[playerNumber] = null; // Free the slot for rejoining players
-    });
-    */
 });

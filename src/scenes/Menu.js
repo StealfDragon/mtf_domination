@@ -33,7 +33,7 @@ class Menu extends Phaser.Scene {
 
         socket.on('startGame', () => {
             console.log("Game starting...");
-            this.scene.start('playScene');
+            this.scene.start('playScene', { playerNumber: this.playerNumber });
         });
 
         socket.on('full', () => {

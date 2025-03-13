@@ -4,7 +4,7 @@ class Play extends Phaser.Scene {
         super("playScene")
     }
 
-    create() {
+    create(data) {
         // this.tempFrance = this.add.tileSprite(0,0, 600, 600, 'France').setOrigin(0,0)
 
         const scaleFactor = 0.75; // Adjust this value to make the shape bigger or smaller
@@ -114,7 +114,7 @@ class Play extends Phaser.Scene {
 
         this.triangles.forEach(triangle => {
             this.triangleHits.set(triangle, 0); // Initialize hit count
-    });
+        });
 
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
@@ -132,27 +132,93 @@ class Play extends Phaser.Scene {
             //let camBorder = this.add.rectangle(1090, 315, 700, 630, 0x000000).setOrigin(0.5);
             //camBorder.setStrokeStyle(4, 0xffffff); // White border for visibility
         
+        this.players = {}; // Store both players
+        this.reticles = {}; // Store reticles for each player
+        this.playerNumber = data.playerNumber; // Receive playerNumber from Menu.js
+
+        console.log(`Entered Play Scene as Player ${this.playerNumber}`);
+
+        socket.on('allplayers', (serverPlayers) => {
+            Object.keys(serverPlayers).forEach((id) => {
+                this.addPlayer(id, serverPlayers[id]);
+            });
+
+            socket.emit('newplayer'); // Inform server we've entered the game
+        });
+
+        socket.on('newplayer', (player) => {
+            this.addPlayer(player.id, player);
+        });
+
+        socket.on('moveReticle', (data) => {
+            if (this.reticles[data.id]) {
+                this.reticles[data.id].x = data.x;
+                this.reticles[data.id].y = data.y;
+            }
+        });
+
+        socket.on('remove', (id) => {
+            if (this.players[id]) {
+                this.players[id].destroy();
+                delete this.players[id];
+            }
+            if (this.reticles[id]) {
+                this.reticles[id].destroy();
+                delete this.reticles[id];
+            }
+        });
+
+        socket.on('hitTriangle', (data) => {
+            console.log(`Triangle hit by player ${data.playerId}`);
+        
+            // Find the triangle that was hit
+            let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
+            graphics.fillTriangleShape(data.triangle);
+        });
+
+        // Create the reticle for THIS player
+        this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
+
+        // Capture mouse movement & update reticle position
+        this.input.on('pointermove', (pointer) => {
+            if (this.reticles[socket.id]) {
+                this.reticles[socket.id].x = pointer.x;
+                this.reticles[socket.id].y = pointer.y;
+                socket.emit('moveReticle', { id: socket.id, x: pointer.x, y: pointer.y });
+            }
+        });
+
+        socket.on('newplayer', () => {
+            if (!players[1] || !players[2]) {
+                socket.emit('allplayers', players);
+                socket.broadcast.emit('newplayer', players[playerNumber]);
+            } else {
+                socket.emit('full', { message: "Game is full!" });
+            }
+        });
     }
 
     update() {
         if (!this.cursors) return;
         let speed = 3.5;
 
-        let minX = 0
-        let minY = 0
-        let maxX = 700
-        let maxY = 700
-        if(this.reticle.x <= maxX && this.reticle.x > minX && this.reticle.y >= minY && this.reticle.y < maxY) {
-            if (this.cursors.left.isDown) {
-                this.reticle.x -= speed;
-            } if (this.cursors.right.isDown) {
-                this.reticle.x += speed;
-            } if (this.cursors.up.isDown) {
-                this.reticle.y -= speed;
-            } if (this.cursors.down.isDown) {
-                this.reticle.y += speed;
-            }
+        let prevX = this.reticle.x;
+        let prevY = this.reticle.y;
+
+        if (this.cursors.left.isDown) this.reticle.x -= speed;
+        if (this.cursors.right.isDown) this.reticle.x += speed;
+        if (this.cursors.up.isDown) this.reticle.y -= speed;
+        if (this.cursors.down.isDown) this.reticle.y += speed;
+
+        // Prevent going out of bounds
+        this.reticle.x = Math.max(0, Math.min(700, this.reticle.x));
+        this.reticle.y = Math.max(0, Math.min(700, this.reticle.y));
+
+        // Only send updates if the position changed
+        if (prevX !== this.reticle.x || prevY !== this.reticle.y) {
+            socket.emit('moveReticle', { id: socket.id, x: this.reticle.x, y: this.reticle.y });
         }
+
         if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
             this.fireReticle()
             this.sound.play('sfx-laser')
@@ -166,8 +232,8 @@ class Play extends Phaser.Scene {
             if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
                 let currentHits = this.triangleHits.get(triangle) || 0
 
-                if (currentHits >= 4) {
-                    console.log("Triangle has already been hit 4 times. No more scoring.")
+                if (currentHits >= 1) {
+                    console.log("Triangle has already been hit once. No more scoring.")
                     return; // Stop further scoring
                 }
 
@@ -183,6 +249,8 @@ class Play extends Phaser.Scene {
                 
                 // Increase hit count
                 this.triangleHits.set(triangle, currentHits + 1)
+
+                socket.emit('hitTriangle', { triangle, hits: currentHits + 1 });
 
                 // Change triangle color to indicate it's been hit
                 let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } })
@@ -233,5 +301,11 @@ class Play extends Phaser.Scene {
                 graphics.fillTriangleShape(triangle);
             });
         });
+    }
+
+    addPlayer(id, playerData) {
+        // Add player & reticle when a new player joins
+        this.players[id] = this.add.sprite(playerData.x, playerData.y, 'player');
+        this.reticles[id] = this.add.image(playerData.x, playerData.y, 'reticle');
     }
 }
