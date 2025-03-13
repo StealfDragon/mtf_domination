@@ -169,11 +169,15 @@ class Play extends Phaser.Scene {
         });
 
         socket.on('hitTriangle', (data) => {
-            console.log(`Triangle hit by player ${data.playerId}`);
+            let triangleKey = JSON.stringify(data.triangle);
         
-            // Find the triangle that was hit
-            let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
-            graphics.fillTriangleShape(data.triangle);
+            if (!this.triangleHits[triangleKey]) {
+                this.triangleHits[triangleKey] = data.hits;
+        
+                // Visually mark the triangle as hit
+                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
+                graphics.fillTriangleShape(data.triangle);
+            }
         });
 
         // Create the reticle for THIS player
@@ -232,6 +236,19 @@ class Play extends Phaser.Scene {
         // Check if the reticle is over a triangle
         for (let triangle of this.triangles) {
             if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+                let triangleKey = JSON.stringify(triangle);
+    
+                if (this.triangleHits[triangleKey]) { // If it's already been hit, ignore it
+                    console.log("Triangle has already been hit. No more scoring.");
+                    return;
+                }
+    
+                socket.emit('hitTriangle', { triangle });
+    
+                break; // Stop checking after the first valid hit
+            }
+            /*
+            if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
                 let currentHits = this.triangleHits.get(triangle) || 0
 
                 if (currentHits >= 1) {
@@ -261,7 +278,9 @@ class Play extends Phaser.Scene {
                 console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
 
                 break; // Stop after hitting one triangle
+                
             }
+                */
         }
     }
 

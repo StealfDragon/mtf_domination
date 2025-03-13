@@ -25,6 +25,7 @@ server.listen(8081, '0.0.0.0', () => {
 
 let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
+let triangleHits = {};
 
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
@@ -71,8 +72,38 @@ io.on('connection', (socket) => {
     });
 
     socket.on('hitTriangle', (data) => {
-        io.emit('hitTriangle', data);
+        let triangleKey = JSON.stringify(data.triangle); // Convert the triangle into a unique string
+    
+        if (!triangleHits[triangleKey]) {
+            triangleHits[triangleKey] = 0; // Initialize hit count
+        }
+    
+        if (triangleHits[triangleKey] >= 1) { // If it's already been hit, reject further hits
+            console.log("Triangle has already been hit. Ignoring.");
+            return;
+        }
+    
+        triangleHits[triangleKey]++; // Increase hit count
+    
+        console.log(`Triangle hit! Storing in server: ${triangleKey}`);
+    
+        io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
     });
+
+    /*
+    socket.on('hitTriangle', (data) => {
+        let triangleKey = JSON.stringify(data.triangle); // Unique identifier for the triangle
+    
+        if (!triangleHits[triangleKey]) {
+            triangleHits[triangleKey] = 0; // Initialize hit count
+        }
+    
+        if (triangleHits[triangleKey] < 1) { // Only allow one hit
+            triangleHits[triangleKey]++;
+            io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
+        }
+    });
+    */
 
     socket.on('disconnect', () => {
         console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
