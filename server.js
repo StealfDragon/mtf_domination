@@ -62,7 +62,6 @@ io.on('connection', (socket) => {
         console.log(`Player ${socket.id} is ready! (${readyPlayers}/2)`);
 
         if (readyPlayers === 2) {
-            triangleHits = {};
             io.emit('startGame'); // Start the game for both players
             console.log("Both players are ready! Starting the game...");
         }
@@ -71,8 +70,6 @@ io.on('connection', (socket) => {
     socket.on('moveReticle', (data) => {
         io.emit('moveReticle', data); // Broadcast movement to all players
     });
-
-    triangleHits = {};
 
     socket.on('hitTriangle', (data) => {
         let triangleKey = JSON.stringify(data.triangle); // Convert the triangle into a unique string
@@ -88,9 +85,6 @@ io.on('connection', (socket) => {
     
         triangleHits[triangleKey]++; // Increase hit count
     
-        let triangleSize = Phaser.Geom.Triangle.Area(data.triangle);
-        let pointsEarned = Math.floor(triangleSize / 10);
-
         console.log(`Triangle hit! Storing in server: ${triangleKey}`);
     
         io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
