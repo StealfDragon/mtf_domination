@@ -174,6 +174,9 @@ class Play extends Phaser.Scene {
             if (!this.triangleHits[triangleKey]) {
                 this.triangleHits[triangleKey] = data.hits;
         
+                this.score += data.points;
+                this.scoreText.setText('Score: ' + this.score);
+
                 // Visually mark the triangle as hit
                 let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
                 graphics.fillTriangleShape(data.triangle);
