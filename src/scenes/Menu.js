@@ -36,8 +36,8 @@ class Menu extends Phaser.Scene {
 
             this.triangleHits = {};
 
-            this.score = 0;
-            this.scoreText.setText('Score: 0');
+            //this.score = 0;
+            //this.scoreText.setText('Score: 0');
 
             this.scene.start('playScene', { playerNumber: this.playerNumber });
         });
