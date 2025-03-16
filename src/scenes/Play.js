@@ -361,8 +361,9 @@ class Play extends Phaser.Scene {
 
     colorTriangle(triangle, playerNumber) {
         let color = (playerNumber === 1) ? 0x0000ff : 0xff0000; // Blue for P1, Red for P2
-    
+        console.log(`Coloring triangle ${JSON.stringify(triangle)} for Player ${playerNumber}`);
+
         let graphics = this.add.graphics({ fillStyle: { color: color, alpha: 0.5 } });
-        graphics.fillTriangleShape(triangle);
+        graphics.fillTriangleShape(new Phaser.Geom.Triangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3));
     }
 }

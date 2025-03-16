@@ -105,7 +105,7 @@ io.on('connection', (socket) => {
             hits: triangleHits[triangleKey],
             points: pointsEarned,
             playerNumber: playerNumber, // Send the player number for coloring
-            scores: playerScores // Send full score data
+            scores: { ...playerScores} // Send full score data
         });
     });
 
