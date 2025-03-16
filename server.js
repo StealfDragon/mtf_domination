@@ -64,6 +64,7 @@ io.on('connection', (socket) => {
 
         if (readyPlayers === 2) {
             triangleHits = {};
+            playerScores = { 1: 0, 2: 0 };
             io.emit('startGame'); // Start the game for both players
             console.log("Both players are ready! Starting the game...");
         }

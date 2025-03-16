@@ -268,7 +268,7 @@ class Play extends Phaser.Scene {
                     return;
                 }
     
-                socket.emit('hitTriangle', { triangle });
+                socket.emit('hitTriangle', { triangle, playerNumber: this.playerNumber });
     
                 break; // Stop checking after the first valid hit
             }
