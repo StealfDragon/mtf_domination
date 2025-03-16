@@ -315,11 +315,13 @@ class Play extends Phaser.Scene {
     
             // Make interactive
             graphics.setInteractive(triangle, Phaser.Geom.Triangle.Contains);
+            /*
             graphics.on('pointerdown', function () {
                 console.log("Triangle clicked:", triangle);
                 let graphics = scene.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
                 graphics.fillTriangleShape(triangle);
             });
+            */
         });
     }
 
