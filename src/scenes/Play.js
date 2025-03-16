@@ -100,6 +100,19 @@ class Play extends Phaser.Scene {
         this.triangles = this.triangulateCountry(this.countryOutline)
         this.drawTriangles(this, this.triangles)
 
+        this.playerScores = { 1: 0, 2: 0 }; // Store both player scores
+
+        this.player1ScoreText = this.add.text(20, 20, 'P1 Score: 0', {
+            fontSize: '24px',
+            fill: '#ffffff'
+        }).setScrollFactor(0);
+
+        this.player2ScoreText = this.add.text(500, 20, 'P2 Score: 0', { // Adjust position for Player 2
+            fontSize: '24px',
+            fill: '#ffffff'
+        }).setScrollFactor(0);
+
+        /*
         //initialize score and score text
         this.score = 0
         this.scoreText = this.add.text(20, 20, 'Score: 0', {
@@ -107,6 +120,7 @@ class Play extends Phaser.Scene {
             fill: '#ffffff'
         })
         this.scoreText.setScrollFactor(0)
+        */
 
          // Add a hit counter to each triangle
         this.triangleHits = new window.Map(); // Store hit counts
@@ -173,10 +187,22 @@ class Play extends Phaser.Scene {
             if (!this.triangleHits[triangleKey]) {
                 this.triangleHits[triangleKey] = data.hits;
         
+                this.playerScores = data.scores;
+                this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+                this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+        
+                this.colorTriangle(data.triangle, data.playerNumber);
+            }
+
+            /*
+            if (!this.triangleHits[triangleKey]) {
+                this.triangleHits[triangleKey] = data.hits;
+        
                 // Visually mark the triangle as hit
                 let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
                 graphics.fillTriangleShape(data.triangle);
             }
+            */
         });
 
         // Create the reticle for THIS player
@@ -331,5 +357,12 @@ class Play extends Phaser.Scene {
         // Add player & reticle when a new player joins
         // this.players[id] = this.add.sprite(playerData.x, playerData.y, 'player');
         this.reticles[id] = this.add.image(playerData.x, playerData.y, 'reticle');
+    }
+
+    colorTriangle(triangle, playerNumber) {
+        let color = (playerNumber === 1) ? 0x0000ff : 0xff0000; // Blue for P1, Red for P2
+    
+        let graphics = this.add.graphics({ fillStyle: { color: color, alpha: 0.5 } });
+        graphics.fillTriangleShape(triangle);
     }
 }

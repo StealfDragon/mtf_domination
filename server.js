@@ -26,6 +26,7 @@ server.listen(8081, '0.0.0.0', () => {
 let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
 let triangleHits = {};
+let playerScores = {1 : 0, 2: 0};
 
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
@@ -85,10 +86,22 @@ io.on('connection', (socket) => {
         }
     
         triangleHits[triangleKey]++; // Increase hit count
+
+        let triangleSize = Phaser.Geom.Triangle.Area(data.triangle);
+        let pointsEarned = Math.floor(triangleSize / 10);
+
+        let playerNumber = data.playerNumber; // Player 1 or Player 2
+        playerScores[playerNumber] += pointsEarned;
     
         console.log(`Triangle hit! Storing in server: ${triangleKey}`);
     
-        io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
+        io.emit('hitTriangle', {
+            triangle: data.triangle,
+            hits: triangleHits[triangleKey],
+            points: pointsEarned,
+            playerNumber: playerNumber, // Send the player number for coloring
+            scores: playerScores // Send full score data
+        });
     });
 
     /*
