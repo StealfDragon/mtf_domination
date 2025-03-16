@@ -87,7 +87,12 @@ io.on('connection', (socket) => {
     
         triangleHits[triangleKey]++; // Increase hit count
 
-        let triangleSize = Phaser.Geom.Triangle.Area(data.triangle);
+        let p1 = data.triangle.x1, p2 = data.triangle.y1;
+        let p3 = data.triangle.x2, p4 = data.triangle.y2;
+        let p5 = data.triangle.x3, p6 = data.triangle.y3;
+
+        // Use the shoelace formula for area
+        let triangleSize = Math.abs((p1 * (p4 - p6) + p3 * (p6 - p2) + p5 * (p2 - p4)) / 2);
         let pointsEarned = Math.floor(triangleSize / 10);
 
         let playerNumber = data.playerNumber; // Player 1 or Player 2
