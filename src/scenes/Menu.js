@@ -29,27 +29,11 @@ class Menu extends Phaser.Scene {
                     fill: "#ffffff"
                 }).setOrigin(0.5);
             }
-
-            //console.log("Text should be visible now:", this.readyText);
         });
 
-        /*
-        socket.on('assignPlayerNumber', (num) => {
-            this.playerNumber = num;
-            console.log(`You are Player ${num}`);
-            
-            let text = (num === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
-            this.readyText = this.add.text(400, 300, text, {
-                fontSize: "24px",
-                fill: "#ffffff"
-            }).setOrigin(0.5);
-        });
-        */
-
-        // Listen for ready signal
         socket.on('startGame', () => {
             console.log("Game starting...");
-            this.scene.start('playScene');
+            this.scene.start('playScene', { playerNumber: this.playerNumber });
         });
 
         socket.on('full', () => {
@@ -60,7 +44,6 @@ class Menu extends Phaser.Scene {
             }).setOrigin(0.5);
         });
 
-        // Separate inputs for each player
         this.input.keyboard.on('keydown-SPACE', () => {
             if (!this.isReady) {
                 this.isReady = true;
