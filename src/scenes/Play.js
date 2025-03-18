@@ -153,8 +153,12 @@ class Play extends Phaser.Scene {
        
         // Create a red rectangle for the danger bar
         this.dangerBars = {
-            1: this.add.rectangle(100, 500, 200, 20, 0xff0000).setOrigin(0, 0.5), // Player 1
-            2: this.add.rectangle(100, 550, 200, 20, 0xff0000).setOrigin(0, 0.5)  // Player 2
+            1: this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0, 1).setStrokeStyle(2, 0xff0000),
+            2: this.add.rectangle(150, 500, 30, 100, 0xffffff).setOrigin(0, 1).setStrokeStyle(2, 0xff0000)
+        };
+        this.dangerFill = {
+            1: this.add.rectangle(100, 500, 30, 0, 0xff0000).setOrigin(0, 1),
+            2: this.add.rectangle(150, 500, 30, 0, 0xff0000).setOrigin(0, 1)
         };
 
         this.dangerLevels = { 1: 0, 2: 0 };
