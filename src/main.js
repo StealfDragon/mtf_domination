@@ -5,7 +5,7 @@ Evan Lara
 Domination
 */
 
-import Play from './src/scenes/Play.js';
+import Play from './scenes/Play.js';
 
 let config = {
     type: Phaser.AUTO,
