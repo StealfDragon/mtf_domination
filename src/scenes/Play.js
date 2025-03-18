@@ -152,19 +152,13 @@ class Play extends Phaser.Scene {
         this.playerNumber = data.playerNumber; // Receive playerNumber from Menu.js
        
         // Create a red rectangle for the danger bar
-        this.dangerBars = {
-            1: this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0, 1).setStrokeStyle(2, 0xff0000),
-            2: this.add.rectangle(150, 500, 30, 100, 0xffffff).setOrigin(0, 1).setStrokeStyle(2, 0xff0000)
-        };
-        this.dangerFill = {
-            1: this.add.rectangle(100, 500, 30, 0, 0xff0000).setOrigin(0, 1),
-            2: this.add.rectangle(150, 500, 30, 0, 0xff0000).setOrigin(0, 1)
-        };
-
-        this.dangerLevels = { 1: 0, 2: 0 };
-        this.dangerMax = 200; // Maximum width of the danger bar
-        this.dangerGrowthRate = this.dangerMax / 10; // Grow 10% every 5 seconds
-        this.dangerUpdateTime = 5000; // 5 seconds
+        this.dangerBarOutline = this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0.5, 1).setStrokeStyle(2, 0xff0000);
+        this.dangerFill = this.add.rectangle(100, 500, 30, 0, 0xff0000).setOrigin(0.5, 1);
+        
+        this.dangerLevel = 0;
+        this.dangerMax = 100;
+        this.dangerGrowthRate = this.dangerMax / 10;
+        this.dangerUpdateTime = 5000;
         this.inQTE = false;
     
         
@@ -279,18 +273,16 @@ class Play extends Phaser.Scene {
         // let behindPlayer = (this.playerScores[this.playerNumber] < this.playerScores[3 - this.playerNumber]);
 
         this.time.addEvent({
-            delay: this.dangerUpdateTime, // 5 seconds
+            delay: this.dangerUpdateTime,
             callback: () => {
-                Object.keys(this.dangerBars).forEach(player => {
-                    if (this.dangerLevels[player] < this.dangerMax) {
-                        this.dangerLevels[player] += this.dangerGrowthRate;
-                        this.dangerBars[player].width = this.dangerLevels[player]; // Update width
-                    }
-        
-                    if (this.dangerLevels[player] >= this.dangerMax && !this.inQTE) {
-                        this.startQTE(player); // Start QTE for this player
-                    }
-                });
+                if (this.dangerLevel < this.dangerMax) {
+                    this.dangerLevel += this.dangerGrowthRate;
+                    this.dangerFill.setSize(30, this.dangerLevel); // Grow vertically
+                }
+
+                if (this.dangerLevel >= this.dangerMax && !this.inQTE) {
+                    this.startQTE();
+                }
             },
             loop: true
         });
