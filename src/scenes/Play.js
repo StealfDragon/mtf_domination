@@ -151,16 +151,27 @@ class Play extends Phaser.Scene {
         this.reticles = {}; // Store reticles for each player
         this.playerNumber = data.playerNumber; // Receive playerNumber from Menu.js
        
-        // Create a red rectangle for the danger bar
-        this.dangerBarOutline = this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0.5, 1).setStrokeStyle(2, 0xff0000);
-        this.dangerFill = this.add.rectangle(100, 500, 30, 1, 0xff0000).setOrigin(0.5, 1);
+        // // Create a red rectangle for the danger bar
+        // this.dangerBarOutline = this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0.5, 1).setStrokeStyle(2, 0xff0000);
+        // this.dangerFill = this.add.rectangle(100, 500, 30, 1, 0xff0000).setOrigin(0.5, 1);
         
-        this.dangerLevel = 0;
-        this.dangerMax = 100;
-        this.dangerGrowthRate = this.dangerMax / 10;
-        this.dangerUpdateTime = 5000;
-        this.inQTE = false;
+        // this.dangerLevel = 0;
+        // this.dangerMax = 100;
+        // this.dangerGrowthRate = this.dangerMax / 10;
+        // this.dangerUpdateTime = 5000;
+        // this.inQTE = false;
     
+        // QTE Elements
+        this.qteActive = false;
+        this.qteTimer = null;
+        this.qteBar = this.add.rectangle(600, 500, 400, 30, 0xff0000).setVisible(false); // Red QTE Zone
+        this.qteTarget = this.add.rectangle(600, 500, 50, 30, 0x00ff00).setVisible(false); // Green Target Zone
+        this.qteMarker = this.add.rectangle(400, 500, 10, 30, 0x888888).setVisible(false); // Grey Moving Bar
+        this.qteDirection = 1; // Move right initially
+
+        // Randomly start the QTE event every 10-20 seconds
+        this.scheduleQTE();
+
         
         console.log(`Entered Play Scene as Player ${this.playerNumber}`);
 
@@ -243,6 +254,8 @@ class Play extends Phaser.Scene {
             socket.emit('sendTriangles', { triangles: this.triangles });
         }, 1000);
         
+        
+        
         /*
         socket.on('newplayer', () => {
             if (!players[1] || !players[2]) {
@@ -253,10 +266,42 @@ class Play extends Phaser.Scene {
             }
         });
         */
+       
     }
-
+    scheduleQTE() {
+        let delay = Phaser.Math.Between(10000, 20000); // 10-20 seconds
+    
+        this.time.delayedCall(delay, () => {
+            this.startQTE();
+        });
+    }
+    startQTE() {
+        if (this.qteActive) return; // Prevent multiple QTEs from starting
+    
+        this.qteActive = true;
+    
+        // Position the red QTE Zone at the bottom center
+        this.qteBar.setPosition(600, 500).setVisible(true);
+    
+        // Randomly position the green target zone within the red bar
+        let minX = this.qteBar.x - this.qteBar.width / 2 + this.qteTarget.width / 2;
+        let maxX = this.qteBar.x + this.qteBar.width / 2 - this.qteTarget.width / 2;
+        this.qteTarget.setPosition(Phaser.Math.Between(minX, maxX), 500).setVisible(true);
+    
+        // Start the grey marker moving left and right
+        this.qteMarker.setPosition(this.qteBar.x - this.qteBar.width / 2, 500).setVisible(true);
+        this.qteDirection = 1; // Move right
+    
+        // Timer to end the QTE after a few seconds
+        this.qteTimer = this.time.delayedCall(3000, () => {
+            this.endQTE(false); // Auto-fail if not completed in time
+        });
+    
+        console.log("QTE Started!");
+    }
+    
     update() {
-        if (!this.cursors || this.inQTE) return; // Disable movement during QTE
+        // if (!this.cursors || this.inQTE) return; // Disable movement during QTE
 
         if (!this.cursors) return;
         let speed = 10;
@@ -269,23 +314,38 @@ class Play extends Phaser.Scene {
         if (this.cursors.up.isDown) this.reticle.y -= speed;
         if (this.cursors.down.isDown) this.reticle.y += speed;
 
+        if (this.qteActive) {
+            let speed = 8; // Adjust speed for difficulty
+            this.qteMarker.x += this.qteDirection * speed;
+    
+            // Reverse direction if hitting the edge of the QTE bar
+            if (this.qteMarker.x >= this.qteBar.x + this.qteBar.width / 2 || 
+                this.qteMarker.x <= this.qteBar.x - this.qteBar.width / 2) {
+                this.qteDirection *= -1;
+            }
+    
+            // Check for player input
+            if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+                this.checkQTE();
+            }
+        }
         // let scoreDiff = Math.abs(this.playerScores[1] - this.playerScores[2]);
         // let behindPlayer = (this.playerScores[this.playerNumber] < this.playerScores[3 - this.playerNumber]);
 
-        this.time.addEvent({
-            delay: this.dangerUpdateTime,
-            callback: () => {
-                if (this.dangerLevel < this.dangerMax) {
-                    this.dangerLevel += this.dangerGrowthRate;
-                    this.dangerFill.setSize(30, this.dangerLevel); // Grow vertically
-                }
+        // this.time.addEvent({
+        //     delay: this.dangerUpdateTime,
+        //     callback: () => {
+        //         if (this.dangerLevel < this.dangerMax) {
+        //             this.dangerLevel += this.dangerGrowthRate;
+        //             this.dangerFill.setSize(30, this.dangerLevel); // Grow vertically
+        //         }
 
-                if (this.dangerLevel >= this.dangerMax && !this.inQTE) {
-                    this.startQTE();
-                }
-            },
-            loop: true
-        });
+        //         if (this.dangerLevel >= this.dangerMax && !this.inQTE) {
+        //             this.startQTE();
+        //         }
+        //     },
+        //     loop: true
+        // });
         
 
         // if (scoreDiff >= 50 && behindPlayer) {
@@ -308,18 +368,18 @@ class Play extends Phaser.Scene {
         //     this.dangerLevels[this.playerNumber] = 0;
         // }
 
-        if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
-            let indicatorY = this.qteIndicator.y;
-            let zoneY = this.qteTargetY;
+        // if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+        //     let indicatorY = this.qteIndicator.y;
+        //     let zoneY = this.qteTargetY;
 
-            if (Math.abs(indicatorY - zoneY) <= 15) {
-                console.log("QTE SUCCESS!");
-                this.qteComplete(true);
-            } else {
-                console.log("QTE FAILED! Game Over!");
-                this.qteComplete(false);
-            }
-        }
+        //     if (Math.abs(indicatorY - zoneY) <= 15) {
+        //         console.log("QTE SUCCESS!");
+        //         this.qteComplete(true);
+        //     } else {
+        //         console.log("QTE FAILED! Game Over!");
+        //         this.qteComplete(false);
+        //     }
+        // }
 
         // Prevent going out of bounds
         this.reticle.x = Math.max(0, Math.min(700, this.reticle.x));
@@ -335,6 +395,49 @@ class Play extends Phaser.Scene {
             this.sound.play('sfx-laser')
         }
     }
+
+    checkQTE() {
+        let markerX = this.qteMarker.x;
+        let targetX = this.qteTarget.x;
+        let targetWidth = this.qteTarget.width / 2;
+    
+        if (markerX >= targetX - targetWidth && markerX <= targetX + targetWidth) {
+            console.log("QTE Success!");
+            this.endQTE(true); // Player succeeded
+        } else {
+            console.log("QTE Failed!");
+            this.endQTE(false); // Player failed
+        }
+    }
+    
+    endQTE(success) {
+        this.qteActive = false;
+    
+        // Hide all QTE elements
+        this.qteBar.setVisible(false);
+        this.qteTarget.setVisible(false);
+        this.qteMarker.setVisible(false);
+    
+        // Cancel the auto-fail timer if it exists
+        if (this.qteTimer) {
+            this.qteTimer.remove(false);
+        }
+    
+        if (success) {
+            console.log("Player Successfully Completed the QTE!");
+            // Reward the player (e.g., extra score)
+            this.playerScores[this.playerNumber] += 50;
+            this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+            this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+        } else {
+            console.log("Player Failed the QTE!");
+            // Punish the player (optional)
+        }
+    
+        // Schedule the next QTE randomly
+        this.scheduleQTE();
+    }
+    
 
     fireReticle() {
         if (!this.activeTarget) return;
@@ -432,61 +535,61 @@ class Play extends Phaser.Scene {
     }
 
 
-    startQTE() {
-        this.inQTE = true; // Disable movement
-        this.qteSuccess = false; // Track QTE success
+    // startQTE() {
+    //     this.inQTE = true; // Disable movement
+    //     this.qteSuccess = false; // Track QTE success
     
-        // let dangerBar = this.dangerBars[this.playerNumber];
+    //     // let dangerBar = this.dangerBars[this.playerNumber];
     
-        // Create a random "target zone"
-        this.qteTargetY = Phaser.Math.Between(-40, 40); // Random position
-        this.qteZone = this.add.rectangle(dangerBar.x, dangerBar.y + this.qteTargetY, 20, 30, 0x00ff00).setOrigin(0.5, 0.5);
+    //     // Create a random "target zone"
+    //     this.qteTargetY = Phaser.Math.Between(-40, 40); // Random position
+    //     this.qteZone = this.add.rectangle(dangerBar.x, dangerBar.y + this.qteTargetY, 20, 30, 0x00ff00).setOrigin(0.5, 0.5);
 
-        // Create moving indicator
-        this.qteIndicator = this.add.rectangle(dangerBar.x, dangerBar.y - 50, 20, 10, 0xff0000).setOrigin(0.5, 0.5);
-        this.qteDirection = 1;
-        this.qteSpeed = 2;
+    //     // Create moving indicator
+    //     this.qteIndicator = this.add.rectangle(dangerBar.x, dangerBar.y - 50, 20, 10, 0xff0000).setOrigin(0.5, 0.5);
+    //     this.qteDirection = 1;
+    //     this.qteSpeed = 2;
     
-        console.log("Quick Time Event Started!");
+    //     console.log("Quick Time Event Started!");
     
-        // Listen for SPACE key press
-        this.qteKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
+    //     // Listen for SPACE key press
+    //     this.qteKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE);
     
-        this.qteLoop = this.time.addEvent({
-            delay: 30, // Speed of movement
-            loop: true,
-            callback: () => {
-                this.qteIndicator.y += this.qteDirection * this.qteSpeed;
+    //     this.qteLoop = this.time.addEvent({
+    //         delay: 30, // Speed of movement
+    //         loop: true,
+    //         callback: () => {
+    //             this.qteIndicator.y += this.qteDirection * this.qteSpeed;
     
-                // Reverse direction if reaching the edges
-                if (this.qteIndicator.y >= dangerBar.y + 50) {
-                    this.qteDirection = -1;
-                } else if (this.qteIndicator.y <= dangerBar.y - 50) {
-                    this.qteDirection = 1;
-                }
-            }
-        });
-    }
+    //             // Reverse direction if reaching the edges
+    //             if (this.qteIndicator.y >= dangerBar.y + 50) {
+    //                 this.qteDirection = -1;
+    //             } else if (this.qteIndicator.y <= dangerBar.y - 50) {
+    //                 this.qteDirection = 1;
+    //             }
+    //         }
+    //     });
+    // }
 
     
 
 
-    qteComplete(success) {
-        this.qteLoop.remove();
-        this.qteIndicator.destroy();
-        this.qteZone.destroy();
+    // qteComplete(success) {
+    //     this.qteLoop.remove();
+    //     this.qteIndicator.destroy();
+    //     this.qteZone.destroy();
     
-        if (success) {
-            this.dangerLevels[this.playerNumber] = 0;
-            this.dangerBars[this.playerNumber].setScale(1, 0);
-            console.log("Player survived! Danger bar reset.");
-        } else {
-            console.log("GAME OVER! Player failed QTE.");
-            this.scene.start("gameOverScene"); // Transition to Game Over screen
-        }
+    //     if (success) {
+    //         this.dangerLevels[this.playerNumber] = 0;
+    //         this.dangerBars[this.playerNumber].setScale(1, 0);
+    //         console.log("Player survived! Danger bar reset.");
+    //     } else {
+    //         console.log("GAME OVER! Player failed QTE.");
+    //         this.scene.start("gameOverScene"); // Transition to Game Over screen
+    //     }
     
-        this.inQTE = false; // Re-enable control
-    }
+    //     this.inQTE = false; // Re-enable control
+    // }
     
     
     triangulateCountry(countryOutline) {
