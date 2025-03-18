@@ -22,7 +22,8 @@ server.listen(8081, '0.0.0.0', () => {
     //console.log('Server running on http://169.233.254.137:8081/');
 });
 
-
+let validTriangles = []; // Will be populated when game starts
+let activeTarget = null; // Store the currently active target
 let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
 let triangleHits = {};
@@ -65,10 +66,33 @@ io.on('connection', (socket) => {
         if (readyPlayers === 2) {
             triangleHits = {};
             playerScores = { 1: 0, 2: 0 };
+            validTriangles = []; //reset valid triangles
+
             io.emit('startGame'); // Start the game for both players
             console.log("Both players are ready! Starting the game...");
+            // Populate the valid triangle list
+            setTimeout(() => {
+                io.emit('requestTriangles'); // Ask clients to send triangle data
+            }, 1000);
         }
     });
+
+    socket.on('sendTriangles', (data) => {
+        if (validTriangles.length === 0) {
+            validTriangles = data.triangles; // Store triangles received from clients
+        }
+    });
+
+    setInterval(() => {
+        if (validTriangles.length === 0) return;
+
+        let availableTriangles = validTriangles.filter(t => !triangleHits[JSON.stringify(t)]);
+        if (availableTriangles.length === 0) return;
+
+        activeTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
+
+        io.emit('newTarget', { triangle: activeTarget });
+    }, 500);
 
     socket.on('moveReticle', (data) => {
         io.emit('moveReticle', data); // Broadcast movement to all players
@@ -87,6 +111,10 @@ io.on('connection', (socket) => {
         }
     
         triangleHits[triangleKey]++; // Increase hit count
+
+        if (triangleHits[triangleKey] >= 4) {
+            validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
+        }
 
         let p1 = data.triangle.x1, p2 = data.triangle.y1;
         let p3 = data.triangle.x2, p4 = data.triangle.y2;

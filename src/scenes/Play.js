@@ -129,6 +129,8 @@ class Play extends Phaser.Scene {
             this.triangleHits.set(triangle, 0); // Initialize hit count
         });
 
+        this.activeTarget = null; // Store the active target
+        this.targetPoint = this.add.circle(0, 0, 5, 0xffffff).setVisible(false); // Invisible until assigned
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
@@ -217,6 +219,19 @@ class Play extends Phaser.Scene {
             }
         });
 
+        socket.on('newTarget', (data) => {
+            this.activeTarget = data.triangle;
+        
+            let centerX = (data.triangle.x1 + data.triangle.x2 + data.triangle.x3) / 3;
+            let centerY = (data.triangle.y1 + data.triangle.y2 + data.triangle.y3) / 3;
+        
+            this.targetPoint.setPosition(centerX, centerY).setVisible(true);
+        });
+        
+        setTimeout(() => {
+            socket.emit('sendTriangles', { triangles: this.triangles });
+        }, 1000);
+        
         /*
         socket.on('newplayer', () => {
             if (!players[1] || !players[2]) {
@@ -256,59 +271,100 @@ class Play extends Phaser.Scene {
         }
     }
 
-
     fireReticle() {
-        // Check if the reticle is over a triangle
-        for (let triangle of this.triangles) {
-            if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
-                let triangleKey = JSON.stringify(triangle);
+        if (!this.activeTarget) return;
     
-                if (this.triangleHits[triangleKey]) { // If it's already been hit, ignore it
-                    console.log("Triangle has already been hit. No more scoring.");
-                    return;
-                }
+        if (Phaser.Geom.Triangle.Contains(this.activeTarget, this.reticle.x, this.reticle.y)) {
+            let triangleKey = JSON.stringify(this.activeTarget);
     
-                socket.emit('hitTriangle', { triangle, playerNumber: this.playerNumber });
-    
-                break; // Stop checking after the first valid hit
+            if (this.triangleHits[triangleKey] >= 4) {
+                console.log("Triangle already fully hit.");
+                return;
             }
-            /*
-            if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
-                let currentHits = this.triangleHits.get(triangle) || 0
-
-                if (currentHits >= 1) {
-                    console.log("Triangle has already been hit once. No more scoring.")
-                    return; // Stop further scoring
-                }
-
-                // Calculate the triangle's size (area)
-                let triangleSize = Phaser.Geom.Triangle.Area(triangle);
-
-                // Give points based on size (example: 10 points per unit of area)
-                let pointsEarned = Math.floor(triangleSize / 10); // Adjust scoring factor if needed
-                this.score += pointsEarned
-
-                // Update score text
-                this.scoreText.setText('Score: ' + this.score)
-                
-                // Increase hit count
-                this.triangleHits.set(triangle, currentHits + 1)
-
-                socket.emit('hitTriangle', { triangle, hits: currentHits + 1 });
-
-                // Change triangle color to indicate it's been hit
-                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } })
-                graphics.fillTriangleShape(triangle);
-
-                console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
-
-                break; // Stop after hitting one triangle
-                
-            }
-                */
+    
+            socket.emit('hitTriangle', { triangle: this.activeTarget, playerNumber: this.playerNumber });
+    
+            // Hide the target point until a new one is assigned
+            this.targetPoint.setVisible(false);
+            this.activeTarget = null;
         }
     }
+    
+    // fireReticle() {
+    //     // Check if the reticle is over a triangle
 
+    //     for (let triangle of this.triangles) {
+    //         if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+    //             let triangleKey = JSON.stringify(triangle);
+    
+    //             if (this.triangleHits[triangleKey]) { // If it's already been hit, ignore it
+    //                 console.log("Triangle has already been hit. No more scoring.");
+    //                 return;
+    //             }
+    
+    //             socket.emit('hitTriangle', { triangle, playerNumber: this.playerNumber });
+    
+    //             break; // Stop checking after the first valid hit
+    //         }
+    //         /*
+    //         if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+    //             let currentHits = this.triangleHits.get(triangle) || 0
+
+    //             if (currentHits >= 1) {
+    //                 console.log("Triangle has already been hit once. No more scoring.")
+    //                 return; // Stop further scoring
+    //             }
+
+    //             // Calculate the triangle's size (area)
+    //             let triangleSize = Phaser.Geom.Triangle.Area(triangle);
+
+    //             // Give points based on size (example: 10 points per unit of area)
+    //             let pointsEarned = Math.floor(triangleSize / 10); // Adjust scoring factor if needed
+    //             this.score += pointsEarned
+
+    //             // Update score text
+    //             this.scoreText.setText('Score: ' + this.score)
+                
+    //             // Increase hit count
+    //             this.triangleHits.set(triangle, currentHits + 1)
+
+    //             socket.emit('hitTriangle', { triangle, hits: currentHits + 1 });
+
+    //             // Change triangle color to indicate it's been hit
+    //             let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } })
+    //             graphics.fillTriangleShape(triangle);
+
+    //             console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
+
+    //             break; // Stop after hitting one triangle
+                
+    //         }
+    //             */
+    //     }
+    // }
+
+    spawnTarget() {
+        // Filter out already shot triangles
+        let availableTriangles = this.validTriangles.filter(triangle => this.triangleHits.get(triangle) < 4);
+    
+        // If no triangles remain, stop spawning targets
+        if (availableTriangles.length === 0) {
+            console.log("No more valid targets.");
+            this.targetPoint.setVisible(false);
+            return;
+        }
+    
+        // Pick a random triangle from available ones
+        let randomTriangle = Phaser.Utils.Array.GetRandom(availableTriangles);
+        this.activeTarget = randomTriangle; // Store active target
+    
+        // Calculate triangle center
+        let centerX = (randomTriangle.x1 + randomTriangle.x2 + randomTriangle.x3) / 3;
+        let centerY = (randomTriangle.y1 + randomTriangle.y2 + randomTriangle.y3) / 3;
+    
+        // Move the target point to the new location and make it visible
+        this.targetPoint.setPosition(centerX, centerY).setVisible(true);
+    }
     
     triangulateCountry(countryOutline) {
         let points = countryOutline.points.map(p => [p.x, p.y]); // Convert Phaser points to array
