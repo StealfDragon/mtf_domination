@@ -1,11 +1,17 @@
+import franceData from '../data/France.json';
+import japanData from '../data/Japan.json';
+import spainData from '../data/Spain.json';
+import usaData from '../data/USA.json';
+import ussrData from '../data/USSR.json';
+
 class Play extends Phaser.Scene {
     constructor() {
         super("playScene")
+        
     }
 
     create(data) {
-        // this.tempFrance = this.add.tileSprite(0,0, 600, 600, 'France').setOrigin(0,0)
-
+        /*
         const scaleFactor = 0.75; // Adjust this value to make the shape bigger or smaller
 
         //this is disorganized, but will be in separate file later (thank god)
@@ -93,7 +99,19 @@ class Play extends Phaser.Scene {
             294.45808 * scaleFactor, 242.15423 * scaleFactor,
             365.96265 * scaleFactor, 232.9695 * scaleFactor
         ]);
-        
+        */
+
+        const selectedMap = this.selectRandomMap();
+        const scaleFactor = selectedMap.scaleFactor;
+
+        // Scale the points dynamically
+        const scaledPoints = franceData.points.map((val, i) =>
+            i % 2 === 0 ? val * scaleFactor : val * scaleFactor
+        );
+
+        // Create polygon
+        this.countryOutline = new Phaser.Geom.Polygon(scaledPoints);
+
         this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
         this.graphics.strokePoints(this.countryOutline.points, true)
 
@@ -365,5 +383,10 @@ class Play extends Phaser.Scene {
 
         let graphics = this.add.graphics({ fillStyle: { color: color, alpha: 0.5 } });
         graphics.fillTriangleShape(new Phaser.Geom.Triangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3));
+    }
+
+    selectRandomMap() {
+        const maps = [japanData, spainData, usaData, ussrData, franceData];
+        return maps[Math.floor(Math.random() * maps.length)];
     }
 }
