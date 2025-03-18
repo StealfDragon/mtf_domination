@@ -8,6 +8,8 @@ class Menu extends Phaser.Scene {
         //Sound Effect by <a href="https://pixabay.com/users/ribhavagrawal-39286533/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Ribhav Agrawal</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Pixabay</a>
         this.load.audio('sfx-laser', './assets/audio/sfx-laser.mp3')
         this.delaunator = 'window.Delaunator';
+        this.load.path = "./assets/"
+        this.load.json('mapData', 'json/mapData.json')
     }
 
     create() {
