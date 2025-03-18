@@ -7,7 +7,7 @@ class Play extends Phaser.Scene {
     create(data) {
         //console.log("Received map from server:", serverData);
         
-        this.selectedMap = serverData.selectedMap;
+        this.selectedMap = data.selectedMap;
         //console.log(`Server chose map: ${this.selectedMap.country}`);
     
         if (!this.selectedMap || !this.selectedMap.points) {
