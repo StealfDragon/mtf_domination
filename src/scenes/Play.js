@@ -246,7 +246,7 @@ class Play extends Phaser.Scene {
 
     update() {
         if (!this.cursors) return;
-        let speed = 3.5;
+        let speed = 5;
 
         let prevX = this.reticle.x;
         let prevY = this.reticle.y;
