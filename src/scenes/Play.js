@@ -8,68 +8,68 @@ class Play extends Phaser.Scene {
         socket.on('startGame', (serverData) => {
             this.selectedMap = serverData.selectedMap;
             //console.log(`Server chose map: ${this.selectedMap.country}`);
+        
+            const scaledPoints = this.selectedMap.points.map(val => 
+                val * this.selectedMap.scaleFactor
+            );
+
+            /*
+            this.maps = this.cache.json.get('mapData')
+
+            this.selectedMap = this.getRandomMap();
+
+            // Scale the points using the scaleFactor
+            const scaledPoints = this.selectedMap.points.map((val, i) => 
+                val * this.selectedMap.scaleFactor
+            );
+
+            
+            const scaleFactor = selectedMap.scaleFactor;
+
+            // Scale the points dynamically
+            const scaledPoints = selectedMap.points.map((val, i) =>
+                i % 2 === 0 ? val * scaleFactor : val * scaleFactor
+            );
+            */
+            // Create polygon
+            this.countryOutline = new Phaser.Geom.Polygon(scaledPoints);
+
+            this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
+            this.graphics.strokePoints(this.countryOutline.points, true)
+
+            this.triangles = this.triangulateCountry(this.countryOutline)
+            this.drawTriangles(this, this.triangles)
+
+            this.playerScores = { 1: 0, 2: 0 }; // Store both player scores
+
+            this.player1ScoreText = this.add.text(20, 20, 'P1 Score: 0', {
+                fontSize: '24px',
+                fill: '#ffffff'
+            }).setScrollFactor(0);
+
+            this.player2ScoreText = this.add.text(500, 20, 'P2 Score: 0', { // Adjust position for Player 2
+                fontSize: '24px',
+                fill: '#ffffff'
+            }).setScrollFactor(0);
+
+            /*
+            //initialize score and score text
+            this.score = 0
+            this.scoreText = this.add.text(20, 20, 'Score: 0', {
+                fontSize: '24px',
+                fill: '#ffffff'
+            })
+            this.scoreText.setScrollFactor(0)
+            */
+
+            // Add a hit counter to each triangle
+            this.triangleHits = new window.Map(); // Store hit counts
+
+            this.triangles.forEach(triangle => {
+                this.triangleHits.set(triangle, 0); // Initialize hit count
+            });
         });
         
-        const scaledPoints = this.selectedMap.points.map(val => 
-            val * this.selectedMap.scaleFactor
-        );
-
-        /*
-        this.maps = this.cache.json.get('mapData')
-
-        this.selectedMap = this.getRandomMap();
-
-        // Scale the points using the scaleFactor
-        const scaledPoints = this.selectedMap.points.map((val, i) => 
-            val * this.selectedMap.scaleFactor
-        );
-
-        
-        const scaleFactor = selectedMap.scaleFactor;
-
-        // Scale the points dynamically
-        const scaledPoints = selectedMap.points.map((val, i) =>
-            i % 2 === 0 ? val * scaleFactor : val * scaleFactor
-        );
-        */
-        // Create polygon
-        this.countryOutline = new Phaser.Geom.Polygon(scaledPoints);
-
-        this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
-        this.graphics.strokePoints(this.countryOutline.points, true)
-
-        this.triangles = this.triangulateCountry(this.countryOutline)
-        this.drawTriangles(this, this.triangles)
-
-        this.playerScores = { 1: 0, 2: 0 }; // Store both player scores
-
-        this.player1ScoreText = this.add.text(20, 20, 'P1 Score: 0', {
-            fontSize: '24px',
-            fill: '#ffffff'
-        }).setScrollFactor(0);
-
-        this.player2ScoreText = this.add.text(500, 20, 'P2 Score: 0', { // Adjust position for Player 2
-            fontSize: '24px',
-            fill: '#ffffff'
-        }).setScrollFactor(0);
-
-        /*
-        //initialize score and score text
-        this.score = 0
-        this.scoreText = this.add.text(20, 20, 'Score: 0', {
-            fontSize: '24px',
-            fill: '#ffffff'
-        })
-        this.scoreText.setScrollFactor(0)
-        */
-
-         // Add a hit counter to each triangle
-        this.triangleHits = new window.Map(); // Store hit counts
-
-        this.triangles.forEach(triangle => {
-            this.triangleHits.set(triangle, 0); // Initialize hit count
-        });
-
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
