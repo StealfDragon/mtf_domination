@@ -92,7 +92,7 @@ io.on('connection', (socket) => {
         activeTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
 
         io.emit('newTarget', { triangle: activeTarget });
-    }, 500);
+    }, 5000);
 
     socket.on('moveReticle', (data) => {
         io.emit('moveReticle', data); // Broadcast movement to all players
