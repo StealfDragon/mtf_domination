@@ -294,7 +294,7 @@ class Play extends Phaser.Scene {
             let indicatorY = this.qteIndicator.y;
             let zoneY = this.qteTargetY;
 
-            if (Math.abs(indicatorY - zoneY) <= 10) {
+            if (Math.abs(indicatorY - zoneY) <= 15) {
                 console.log("QTE SUCCESS!");
                 this.qteComplete(true);
             } else {
@@ -427,6 +427,7 @@ class Play extends Phaser.Scene {
         // Create moving indicator
         this.qteIndicator = this.add.rectangle(dangerBar.x, dangerBar.y - 50, 20, 10, 0xff0000).setOrigin(0.5, 0.5);
         this.qteDirection = 1;
+        this.qteSpeed = 2;
     
         console.log("Quick Time Event Started!");
     
@@ -437,9 +438,13 @@ class Play extends Phaser.Scene {
             delay: 30, // Speed of movement
             loop: true,
             callback: () => {
-                this.qteIndicator.y += this.qteDirection * 5;
-                if (this.qteIndicator.y >= 620 || this.qteIndicator.y <= 550) {
-                    this.qteDirection *= -1; // Bounce back
+                this.qteIndicator.y += this.qteDirection * this.qteSpeed;
+    
+                // Reverse direction if reaching the edges
+                if (this.qteIndicator.y >= dangerBar.y + 50) {
+                    this.qteDirection = -1;
+                } else if (this.qteIndicator.y <= dangerBar.y - 50) {
+                    this.qteDirection = 1;
                 }
             }
         });
