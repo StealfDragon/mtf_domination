@@ -151,15 +151,19 @@ class Play extends Phaser.Scene {
         this.reticles = {}; // Store reticles for each player
         this.playerNumber = data.playerNumber; // Receive playerNumber from Menu.js
        
-        this.dangerBars = {}; // Store each player's danger bar
+        // Create a red rectangle for the danger bar
+        this.dangerBars = {
+            1: this.add.rectangle(100, 500, 200, 20, 0xff0000).setOrigin(0, 0.5), // Player 1
+            2: this.add.rectangle(100, 550, 200, 20, 0xff0000).setOrigin(0, 0.5)  // Player 2
+        };
+
         this.dangerLevels = { 1: 0, 2: 0 };
-        this.dangerMax = 100;
-        this.dangerSpeed = { 1: 0, 2: 0 };
-        this.inQTE = false; // Track if player is in Quick Time Event
+        this.dangerMax = 200; // Maximum width of the danger bar
+        this.dangerGrowthRate = this.dangerMax / 10; // Grow 10% every 5 seconds
+        this.dangerUpdateTime = 5000; // 5 seconds
+        this.inQTE = false;
     
-        // Add individual danger bars for each player
-        this.dangerBars[1] = this.add.image(50, 300, 'dangerbar').setOrigin(0.5, 0.5).setScale(1, 0)
-        this.dangerBars[2] = this.add.image(50, 300, 'dangerbar').setOrigin(0.5, 0.5).setScale(1, 0)
+        
         console.log(`Entered Play Scene as Player ${this.playerNumber}`);
 
         socket.on('allplayers', (serverPlayers) => {
@@ -267,28 +271,46 @@ class Play extends Phaser.Scene {
         if (this.cursors.up.isDown) this.reticle.y -= speed;
         if (this.cursors.down.isDown) this.reticle.y += speed;
 
-        let scoreDiff = Math.abs(this.playerScores[1] - this.playerScores[2]);
-        let behindPlayer = (this.playerScores[this.playerNumber] < this.playerScores[3 - this.playerNumber]);
+        // let scoreDiff = Math.abs(this.playerScores[1] - this.playerScores[2]);
+        // let behindPlayer = (this.playerScores[this.playerNumber] < this.playerScores[3 - this.playerNumber]);
 
-        if (scoreDiff >= 50 && behindPlayer) {
-            let dangerBar = this.dangerBars[this.playerNumber];
-            // dangerBar.setVisible(true);
+        this.time.addEvent({
+            delay: this.dangerUpdateTime, // 5 seconds
+            callback: () => {
+                Object.keys(this.dangerBars).forEach(player => {
+                    if (this.dangerLevels[player] < this.dangerMax) {
+                        this.dangerLevels[player] += this.dangerGrowthRate;
+                        this.dangerBars[player].width = this.dangerLevels[player]; // Update width
+                    }
+        
+                    if (this.dangerLevels[player] >= this.dangerMax && !this.inQTE) {
+                        this.startQTE(player); // Start QTE for this player
+                    }
+                });
+            },
+            loop: true
+        });
+        
 
-            // Increase danger speed based on score gap
-            this.dangerSpeed[this.playerNumber] = Math.min(scoreDiff / 10, 5);
-            this.dangerLevels[this.playerNumber] += this.dangerSpeed[this.playerNumber];
+        // if (scoreDiff >= 50 && behindPlayer) {
+        //     let dangerBar = this.dangerBars[this.playerNumber];
+        //     // dangerBar.setVisible(true);
 
-            let fillAmount = Math.min(this.dangerLevels[this.playerNumber] / this.dangerMax, 1);
-            dangerBar.setScale(1, fillAmount);
+        //     // Increase danger speed based on score gap
+        //     this.dangerSpeed[this.playerNumber] = Math.min(scoreDiff / 10, 5);
+        //     this.dangerLevels[this.playerNumber] += this.dangerSpeed[this.playerNumber];
 
-            if (this.dangerLevels[this.playerNumber] >= this.dangerMax) {
-                console.log("DANGER MAXED OUT! Quick Time Event starts!");
-                this.startQTE();
-            }
-        } else {
-            this.dangerBars[this.playerNumber].setVisible(false);
-            this.dangerLevels[this.playerNumber] = 0;
-        }
+        //     let fillAmount = Math.min(this.dangerLevels[this.playerNumber] / this.dangerMax, 1);
+        //     dangerBar.setScale(1, fillAmount);
+
+        //     if (this.dangerLevels[this.playerNumber] >= this.dangerMax) {
+        //         console.log("DANGER MAXED OUT! Quick Time Event starts!");
+        //         this.startQTE();
+        //     }
+        // } else {
+        //     this.dangerBars[this.playerNumber].setVisible(false);
+        //     this.dangerLevels[this.playerNumber] = 0;
+        // }
 
         if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
             let indicatorY = this.qteIndicator.y;
