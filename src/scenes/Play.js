@@ -1,10 +1,9 @@
-
 class Play extends Phaser.Scene {
     constructor() {
         super("playScene")
     }
 
-    create() {
+    create(data) {
         // this.tempFrance = this.add.tileSprite(0,0, 600, 600, 'France').setOrigin(0,0)
 
         const scaleFactor = 0.75; // Adjust this value to make the shape bigger or smaller
@@ -101,6 +100,19 @@ class Play extends Phaser.Scene {
         this.triangles = this.triangulateCountry(this.countryOutline)
         this.drawTriangles(this, this.triangles)
 
+        this.playerScores = { 1: 0, 2: 0 }; // Store both player scores
+
+        this.player1ScoreText = this.add.text(20, 20, 'P1 Score: 0', {
+            fontSize: '24px',
+            fill: '#ffffff'
+        }).setScrollFactor(0);
+
+        this.player2ScoreText = this.add.text(500, 20, 'P2 Score: 0', { // Adjust position for Player 2
+            fontSize: '24px',
+            fill: '#ffffff'
+        }).setScrollFactor(0);
+
+        /*
         //initialize score and score text
         this.score = 0
         this.scoreText = this.add.text(20, 20, 'Score: 0', {
@@ -108,13 +120,14 @@ class Play extends Phaser.Scene {
             fill: '#ffffff'
         })
         this.scoreText.setScrollFactor(0)
+        */
 
          // Add a hit counter to each triangle
         this.triangleHits = new window.Map(); // Store hit counts
 
         this.triangles.forEach(triangle => {
             this.triangleHits.set(triangle, 0); // Initialize hit count
-    });
+        });
 
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
@@ -132,27 +145,111 @@ class Play extends Phaser.Scene {
             //let camBorder = this.add.rectangle(1090, 315, 700, 630, 0x000000).setOrigin(0.5);
             //camBorder.setStrokeStyle(4, 0xffffff); // White border for visibility
         
+        this.players = {}; // Store both players
+        this.reticles = {}; // Store reticles for each player
+        this.playerNumber = data.playerNumber; // Receive playerNumber from Menu.js
+
+        console.log(`Entered Play Scene as Player ${this.playerNumber}`);
+
+        socket.on('allplayers', (serverPlayers) => {
+            Object.keys(serverPlayers).forEach((id) => {
+                this.addPlayer(id, serverPlayers[id]);
+            });
+
+            socket.emit('newplayer'); // Inform server we've entered the game
+        });
+
+        socket.on('newplayer', (player) => {
+            this.addPlayer(player.id, player);
+        });
+
+        socket.on('moveReticle', (data) => {
+            if (data.id !== socket.id && this.reticles[data.id]) {
+                this.reticles[data.id].x = data.x;
+                this.reticles[data.id].y = data.y;
+            }
+        });
+
+        socket.on('remove', (id) => {
+            if (this.players[id]) {
+                this.players[id].destroy();
+                delete this.players[id];
+            }
+            if (this.reticles[id]) {
+                this.reticles[id].destroy();
+                delete this.reticles[id];
+            }
+        });
+
+        socket.on('hitTriangle', (data) => {
+            let triangleKey = JSON.stringify(data.triangle);
+        
+            if (!this.triangleHits[triangleKey]) {
+                this.triangleHits[triangleKey] = data.hits;
+        
+                this.playerScores = data.scores;
+                this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+                this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+        
+                this.colorTriangle(data.triangle, data.playerNumber);
+            }
+
+            /*
+            if (!this.triangleHits[triangleKey]) {
+                this.triangleHits[triangleKey] = data.hits;
+        
+                // Visually mark the triangle as hit
+                let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
+                graphics.fillTriangleShape(data.triangle);
+            }
+            */
+        });
+
+        // Create the reticle for THIS player
+        // this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
+
+        // Capture mouse movement & update reticle position
+        this.input.on('pointermove', (pointer) => {
+            if (this.reticles[socket.id]) {
+                this.reticles[socket.id].x = pointer.x;
+                this.reticles[socket.id].y = pointer.y;
+                socket.emit('moveReticle', { id: socket.id, x: pointer.x, y: pointer.y });
+            }
+        });
+
+        /*
+        socket.on('newplayer', () => {
+            if (!players[1] || !players[2]) {
+                socket.emit('allplayers', players);
+                socket.broadcast.emit('newplayer', players[playerNumber]);
+            } else {
+                socket.emit('full', { message: "Game is full!" });
+            }
+        });
+        */
     }
 
     update() {
         if (!this.cursors) return;
         let speed = 3.5;
 
-        let minX = 0
-        let minY = 0
-        let maxX = 700
-        let maxY = 700
-        if(this.reticle.x <= maxX && this.reticle.x > minX && this.reticle.y >= minY && this.reticle.y < maxY) {
-            if (this.cursors.left.isDown) {
-                this.reticle.x -= speed;
-            } if (this.cursors.right.isDown) {
-                this.reticle.x += speed;
-            } if (this.cursors.up.isDown) {
-                this.reticle.y -= speed;
-            } if (this.cursors.down.isDown) {
-                this.reticle.y += speed;
-            }
+        let prevX = this.reticle.x;
+        let prevY = this.reticle.y;
+
+        if (this.cursors.left.isDown) this.reticle.x -= speed;
+        if (this.cursors.right.isDown) this.reticle.x += speed;
+        if (this.cursors.up.isDown) this.reticle.y -= speed;
+        if (this.cursors.down.isDown) this.reticle.y += speed;
+
+        // Prevent going out of bounds
+        this.reticle.x = Math.max(0, Math.min(700, this.reticle.x));
+        this.reticle.y = Math.max(0, Math.min(700, this.reticle.y));
+
+        // Only send updates if the position changed
+        if (prevX !== this.reticle.x || prevY !== this.reticle.y) {
+            socket.emit('moveReticle', { id: socket.id, x: this.reticle.x, y: this.reticle.y });
         }
+
         if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
             this.fireReticle()
             this.sound.play('sfx-laser')
@@ -164,10 +261,23 @@ class Play extends Phaser.Scene {
         // Check if the reticle is over a triangle
         for (let triangle of this.triangles) {
             if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
+                let triangleKey = JSON.stringify(triangle);
+    
+                if (this.triangleHits[triangleKey]) { // If it's already been hit, ignore it
+                    console.log("Triangle has already been hit. No more scoring.");
+                    return;
+                }
+    
+                socket.emit('hitTriangle', { triangle, playerNumber: this.playerNumber });
+    
+                break; // Stop checking after the first valid hit
+            }
+            /*
+            if (Phaser.Geom.Triangle.Contains(triangle, this.reticle.x, this.reticle.y)) {
                 let currentHits = this.triangleHits.get(triangle) || 0
 
-                if (currentHits >= 4) {
-                    console.log("Triangle has already been hit 4 times. No more scoring.")
+                if (currentHits >= 1) {
+                    console.log("Triangle has already been hit once. No more scoring.")
                     return; // Stop further scoring
                 }
 
@@ -184,6 +294,8 @@ class Play extends Phaser.Scene {
                 // Increase hit count
                 this.triangleHits.set(triangle, currentHits + 1)
 
+                socket.emit('hitTriangle', { triangle, hits: currentHits + 1 });
+
                 // Change triangle color to indicate it's been hit
                 let graphics = this.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } })
                 graphics.fillTriangleShape(triangle);
@@ -191,7 +303,9 @@ class Play extends Phaser.Scene {
                 console.log(`Hit triangle! Size: ${triangleSize}, Score: ${this.score}`);
 
                 break; // Stop after hitting one triangle
+                
             }
+                */
         }
     }
 
@@ -227,11 +341,29 @@ class Play extends Phaser.Scene {
     
             // Make interactive
             graphics.setInteractive(triangle, Phaser.Geom.Triangle.Contains);
+            /*
             graphics.on('pointerdown', function () {
                 console.log("Triangle clicked:", triangle);
                 let graphics = scene.add.graphics({ fillStyle: { color: 0xff0000, alpha: 0.5 } });
                 graphics.fillTriangleShape(triangle);
             });
+            */
         });
+    }
+
+    addPlayer(id, playerData) {
+        if (this.reticles[id]) return;
+
+        // Add player & reticle when a new player joins
+        // this.players[id] = this.add.sprite(playerData.x, playerData.y, 'player');
+        this.reticles[id] = this.add.image(playerData.x, playerData.y, 'reticle');
+    }
+
+    colorTriangle(triangle, playerNumber) {
+        let color = (playerNumber === 1) ? 0x0000ff : 0xff0000; // Blue for P1, Red for P2
+        console.log(`Coloring triangle ${JSON.stringify(triangle)} for Player ${playerNumber}`);
+
+        let graphics = this.add.graphics({ fillStyle: { color: color, alpha: 0.5 } });
+        graphics.fillTriangleShape(new Phaser.Geom.Triangle(triangle.x1, triangle.y1, triangle.x2, triangle.y2, triangle.x3, triangle.y3));
     }
 }
