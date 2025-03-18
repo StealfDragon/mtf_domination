@@ -153,7 +153,7 @@ class Play extends Phaser.Scene {
        
         // Create a red rectangle for the danger bar
         this.dangerBarOutline = this.add.rectangle(100, 500, 30, 100, 0xffffff).setOrigin(0.5, 1).setStrokeStyle(2, 0xff0000);
-        this.dangerFill = this.add.rectangle(100, 500, 30, 0, 0xff0000).setOrigin(0.5, 1);
+        this.dangerFill = this.add.rectangle(100, 500, 30, 1, 0xff0000).setOrigin(0.5, 1);
         
         this.dangerLevel = 0;
         this.dangerMax = 100;
@@ -436,7 +436,7 @@ class Play extends Phaser.Scene {
         this.inQTE = true; // Disable movement
         this.qteSuccess = false; // Track QTE success
     
-        let dangerBar = this.dangerBars[this.playerNumber];
+        // let dangerBar = this.dangerBars[this.playerNumber];
     
         // Create a random "target zone"
         this.qteTargetY = Phaser.Math.Between(-40, 40); // Random position
