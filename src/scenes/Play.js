@@ -390,3 +390,4 @@ class Play extends Phaser.Scene {
         return maps[Math.floor(Math.random() * maps.length)];
     }
 }
+export default Play;
