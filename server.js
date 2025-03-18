@@ -71,6 +71,7 @@ io.on('connection', (socket) => {
             triangleHits = {};
             playerScores = { 1: 0, 2: 0 };
             selectedMap = mapData[Math.floor(Math.random() * mapData.length)];
+            console.log("🚀 Selected Map:", selectedMap);
             io.emit('startGame', { selectedMap }); // Start the game for both players
             console.log("Both players are ready! Starting the game...");
         }

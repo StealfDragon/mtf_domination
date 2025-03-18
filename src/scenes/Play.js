@@ -6,9 +6,18 @@ class Play extends Phaser.Scene {
 
     create(data) {
         socket.on('startGame', (serverData) => {
+            console.log("📡 Received map from server:", serverData);
+            
             this.selectedMap = serverData.selectedMap;
             //console.log(`Server chose map: ${this.selectedMap.country}`);
         
+            if (!this.selectedMap || !this.selectedMap.points) {
+                console.error("No map data received from server!");
+                return;
+            }
+        
+            console.log(`Server chose map: ${this.selectedMap.country}`);
+
             const scaledPoints = this.selectedMap.points.map(val => 
                 val * this.selectedMap.scaleFactor
             );
@@ -69,7 +78,7 @@ class Play extends Phaser.Scene {
                 this.triangleHits.set(triangle, 0); // Initialize hit count
             });
         });
-        
+
         this.reticle = this.add.sprite(400, 300, 'reticle')
         this.cursors = this.input.keyboard.createCursorKeys()
         this.spaceKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SPACE)
