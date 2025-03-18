@@ -290,19 +290,18 @@ class Play extends Phaser.Scene {
             this.dangerLevels[this.playerNumber] = 0;
         }
 
-        // if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.qteKey)) {
-        //     let indicatorY = this.qteIndicator.y - 550;
-        //     let zoneY = this.qteTargetY;
-    
-        //     if (Math.abs(indicatorY - zoneY) <= 10) { // Success if within range
-        //         console.log("QTE SUCCESS!");
-        //         this.qteSuccess = true;
-        //         this.qteComplete(true);
-        //     } else {
-        //         console.log("QTE FAILED! Game Over!");
-        //         this.qteComplete(false);
-        //     }
-        // }
+        if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.qteKey)) {
+            let indicatorY = this.qteIndicator.y;
+            let zoneY = this.qteTargetY;
+
+            if (Math.abs(indicatorY - zoneY) <= 10) {
+                console.log("QTE SUCCESS!");
+                this.qteComplete(true);
+            } else {
+                console.log("QTE FAILED! Game Over!");
+                this.qteComplete(false);
+            }
+        }
 
         // Prevent going out of bounds
         this.reticle.x = Math.max(0, Math.min(700, this.reticle.x));
@@ -446,20 +445,7 @@ class Play extends Phaser.Scene {
         });
     }
 
-    update() {
-        if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.qteKey)) {
-            let indicatorY = this.qteIndicator.y;
-            let zoneY = this.qteTargetY;
-
-            if (Math.abs(indicatorY - zoneY) <= 10) {
-                console.log("QTE SUCCESS!");
-                this.qteComplete(true);
-            } else {
-                console.log("QTE FAILED! Game Over!");
-                this.qteComplete(false);
-            }
-        }
-    }
+    
 
 
     qteComplete(success) {
