@@ -162,6 +162,7 @@ class Play extends Phaser.Scene {
         // this.inQTE = false;
     
         // QTE Elements
+        this.shiftKey = this.input.keyboard.addKey(Phaser.Input.Keyboard.KeyCodes.SHIFT);
         this.qteActive = false;
         this.qteTimer = null;
         this.qteBar = this.add.rectangle(600, 500, 400, 30, 0xff0000).setVisible(false); // Red QTE Zone
@@ -325,9 +326,10 @@ class Play extends Phaser.Scene {
             }
     
             // Check for player input
-            if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+            if (Phaser.Input.Keyboard.JustDown(this.shiftKey)) {
                 this.checkQTE();
             }
+            return;
         }
         // let scoreDiff = Math.abs(this.playerScores[1] - this.playerScores[2]);
         // let behindPlayer = (this.playerScores[this.playerNumber] < this.playerScores[3 - this.playerNumber]);
