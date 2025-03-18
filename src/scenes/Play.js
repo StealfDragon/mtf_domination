@@ -290,7 +290,7 @@ class Play extends Phaser.Scene {
             this.dangerLevels[this.playerNumber] = 0;
         }
 
-        if (Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
+        if (this.inQTE && Phaser.Input.Keyboard.JustDown(this.spaceKey)) {
             let indicatorY = this.qteIndicator.y;
             let zoneY = this.qteTargetY;
 
