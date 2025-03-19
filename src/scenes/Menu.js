@@ -2,7 +2,7 @@ class Menu extends Phaser.Scene {
     constructor() {
         super("Menu");
     }
-
+    
     preload() {
         this.load.image('reticle', './assets/img/TempDominationReticle.png')
         //Sound Effect by <a href="https://pixabay.com/users/ribhavagrawal-39286533/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Ribhav Agrawal</a> from <a href="https://pixabay.com/sound-effects//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=230500">Pixabay</a>
