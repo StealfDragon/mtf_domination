@@ -29,7 +29,7 @@ class Menu extends Phaser.Scene {
         }).setOrigin(0.5);
 
         // Add instructions under the ready prompt
-        this.add.text(400, 400, "Instructions: shoot the triangle regions when a target appears in them.\nBut watch out! Every so often, you'll get a shock (a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
+        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them. But watch out!\nEvery so often, you'll get a shock (a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
             fontSize: "18px",
             fill: "#cccccc",
             align: "center"
@@ -60,6 +60,14 @@ class Menu extends Phaser.Scene {
             */
         });
 
+        socket.on('startGame', (serverData) => {
+            console.log("Game starting...");
+            this.scene.start('playScene', { 
+                playerNumber: this.playerNumber, 
+                selectedMap: serverData.selectedMap 
+            });
+        });
+
         let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
             console.log("Received Player Number, setting text:", text);
 
@@ -71,14 +79,6 @@ class Menu extends Phaser.Scene {
                 fill: "#ffffff"
             }).setOrigin(0.5);
         }
-
-        socket.on('startGame', (serverData) => {
-            console.log("Game starting...");
-            this.scene.start('playScene', { 
-                playerNumber: this.playerNumber, 
-                selectedMap: serverData.selectedMap 
-            });
-        });
 
         socket.on('full', () => {
             console.log("Game is full! Redirecting...");
