@@ -3,7 +3,7 @@
         "country": "France",
         "num": 1,
         "scaleFactor": 0.75,
-        "xOffset" : -100,
+        "xOffset" : -75,
         "comment" : "no y",
         "yOffset" : 0,
         "zoomFactor" : 0,
@@ -97,7 +97,7 @@
         "num": 2,
         "scaleFactor": 2.7,
         "xOffset" : 100,
-        "yOffset" : -100,
+        "yOffset" : 100,
         "zoomFactor" : 0,
         "points": [
             166.38623, 1.25403, 176.76281, 0.00004,
@@ -149,7 +149,7 @@
         "scaleFactor": 3.7,
         "xOffset" : 0,
         "comment" : "no x",
-        "yOffset" : -100,
+        "yOffset" : -75,
         "zoomFactor" : 0,
         "points": [
             33.492215, 34.319183, 42.037552, 38.178369, 58.846238, 38.521539, 
@@ -188,7 +188,7 @@
         "scaleFactor": 3.7,
         "xOffset" : 0,
         "comment" : "no x or y",
-        "yOffset" : 0,
+        "yOffset" : -25,
         "zoomFactor" : 0,
         "points": [
             17.424432, 37.189439, 58.946459, 46.087017, 104.17581, 48.86751,
@@ -229,7 +229,7 @@
         "scaleFactor": 3.6,
         "xOffset" : 0,
         "comment" : "no x",
-        "yOffset" : -100,
+        "yOffset" : -50,
         "zoomFactor" : 0,
         "points": [
             14.090515, 141.06967, 11.850963, 117.36775, 18.662935, 116.52792, 
