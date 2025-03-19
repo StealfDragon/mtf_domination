@@ -9,7 +9,12 @@ Credits: Used some code (not even sure if any of it left so may be more inspirat
 
 Stuff For Assignment Credit:
 Phaser Components Used:
-
+Cameras
+Text Objects
+Timers
+Graphics
+Math
+Geom
 
 Tilt Part:
 Non-Local Multiplayer

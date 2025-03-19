@@ -29,7 +29,7 @@ class Menu extends Phaser.Scene {
         
 
         // Add instructions under the ready prompt
-        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them. But watch out!\nEvery so often, you'll get a shock\n(a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
+        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them.\nBut watch out!Every so often, you'll get a shock\n(a quick time event, which is a game over if lost)\nFirst person to reach 8000 points wins.\n\nPress SPACE to shoot and use ARROW KEYS to move the reticle\npress SHIFT for QTEs", {
             fontSize: "18px",
             fill: "#cccccc",
             align: "center"
