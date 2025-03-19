@@ -247,7 +247,7 @@ class Play extends Phaser.Scene {
         // if (!this.cursors || this.inQTE) return; // Disable movement during QTE
 
         if (!this.cursors) return;
-        let speed = 10;
+        let speed = 7;
 
         let prevX = this.reticle.x;
         let prevY = this.reticle.y;
