@@ -93,17 +93,6 @@ io.on('connection', (socket) => {
         /*
         if (validTriangles.length === 0) return;
 
-        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
-        if (availableTriangles.length === 0) return;
-
-        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
-
-        activeTargets[JSON.stringify(newTarget)] = newTarget;  // ✅ Store multiple active targets
-
-        io.emit('newTarget', { triangle: newTarget });
-        */
-        if (validTriangles.length === 0) return;
-
         // Check if an active target already exists
         if (Object.keys(activeTargets).length > 0) {
             return;
@@ -116,6 +105,18 @@ io.on('connection', (socket) => {
         let triangleKey = JSON.stringify(newTarget);
     
         activeTargets[triangleKey] = newTarget;  // ✅ Store new target but do NOT remove old one
+    
+        io.emit('newTarget', { triangle: newTarget });
+        */
+        if (validTriangles.length === 0) return;
+
+        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
+        if (availableTriangles.length === 0) return;
+    
+        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
+        let triangleKey = JSON.stringify(newTarget);
+    
+        activeTargets[triangleKey] = newTarget;  // ✅ Keep all active targets
     
         io.emit('newTarget', { triangle: newTarget });
     }, 750);
@@ -138,10 +139,8 @@ io.on('connection', (socket) => {
     
         triangleHits[triangleKey]++; // Increase hit count
 
-        if (triangleHits[triangleKey] >= 1) {
-            delete activeTargets[triangleKey];
-            validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
-        }
+        delete activeTargets[triangleKey];
+        validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
 
         let p1 = data.triangle.x1, p2 = data.triangle.y1;
         let p3 = data.triangle.x2, p4 = data.triangle.y2;
