@@ -1,4 +1,5 @@
 {
+    "type": "commonjs",
     "name": "mtf_domination",
     "version": "1.0.0",
     "description": " Basic adaptation of the game Domination from 1983's Never Say Never Again ",

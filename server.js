@@ -2,6 +2,8 @@ var express = require('express');
 var http = require('http');
 var socketIo = require('socket.io');
 
+const fs = require('fs');
+
 var app = express();
 var server = http.createServer(app);
 var io = socketIo(server); // Corrected initialization
@@ -28,6 +30,9 @@ let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
 let triangleHits = {};
 let playerScores = {1 : 0, 2: 0};
+
+let mapData = JSON.parse(fs.readFileSync('./assets/json/mapData.json')); // Load maps.json
+let selectedMap = null;
 
 io.on('connection', (socket) => {
     console.log(`Player connected: ${socket.id}`);
@@ -66,9 +71,10 @@ io.on('connection', (socket) => {
         if (readyPlayers === 2) {
             triangleHits = {};
             playerScores = { 1: 0, 2: 0 };
+            selectedMap = mapData[Math.floor(Math.random() * mapData.length)];
+            console.log("🚀 Selected Map:", selectedMap);
             validTriangles = []; //reset valid triangles
-
-            io.emit('startGame'); // Start the game for both players
+            io.emit('startGame', { selectedMap }); // Start the game for both players
             console.log("Both players are ready! Starting the game...");
             // Populate the valid triangle list
             setTimeout(() => {
