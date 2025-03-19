@@ -151,15 +151,43 @@ class Play extends Phaser.Scene {
         socket.on('hitTriangle', (data) => {
             let triangleKey = JSON.stringify(data.triangle);
         
-            if (!this.triangleHits[triangleKey]) {
-                this.triangleHits[triangleKey] = data.hits;
-        
-                this.playerScores = data.scores;
-                this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
-                this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
-        
-                this.colorTriangle(data.triangle, data.playerNumber);
+            // Find the triangle in our stored list
+            let triangle = this.triangles.find(t => JSON.stringify(t) === triangleKey);
+            
+            if (!triangle) {
+                console.warn("Triangle not found for hit event:", data.triangle);
+                return;
             }
+        
+            // Remove dot if present
+            if (this.triangleDots.has(triangle)) {
+                this.triangleDots.get(triangle).destroy(); // Remove dot from scene
+                this.triangleDots.delete(triangle); // Remove reference
+            }
+        
+            // Mark the triangle as hit
+            this.triangleHits.set(triangle, (this.triangleHits.get(triangle) || 0) + 1);        
+            // Update scores
+            this.playerScores = data.scores;
+            this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+            this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+        
+            // Color the triangle to indicate it was hit
+            this.colorTriangle(data.triangle, data.playerNumber);
+        });
+        
+        //socket.on('hitTriangle', (data) => {
+            //let triangleKey = JSON.stringify(data.triangle);
+        
+            //if (!this.triangleHits[triangleKey]) {
+                //this.triangleHits[triangleKey] = data.hits;
+        
+                //this.playerScores = data.scores;
+                //this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+                //this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+        
+                //this.colorTriangle(data.triangle, data.playerNumber);
+            //}
 
             /*
             if (!this.triangleHits[triangleKey]) {
@@ -170,6 +198,7 @@ class Play extends Phaser.Scene {
                 graphics.fillTriangleShape(data.triangle);
             }
             */
+        //});
         });
 
         // Create the reticle for THIS player
