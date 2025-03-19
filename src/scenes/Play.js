@@ -20,9 +20,18 @@ class Play extends Phaser.Scene {
         this.xOffset = this.selectedMap.xOffset
         this.yOffset = this.selectedMap.yOffset
 
+        const adjustedPoints = [];
+        for (let i = 0; i < this.selectedMap.points.length; i += 2) {
+            let x = (this.selectedMap.points[i] * this.selectedMap.scaleFactor) + this.xOffset;
+            let y = (this.selectedMap.points[i + 1] * this.selectedMap.scaleFactor) + this.yOffset;
+            adjustedPoints.push({ x, y });
+        }
+
+        /*
         const adjustedPoints = this.selectedMap.points.map((val, i) => 
             (val * this.selectedMap.scaleFactor) + (i % 2 === 0 ? xOffset : yOffset)
         );
+        */
 
         // Create polygon
         this.countryOutline = new Phaser.Geom.Polygon(adjustedPoints);
