@@ -116,7 +116,7 @@ io.on('connection', (socket) => {
         let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
         let triangleKey = JSON.stringify(newTarget);
     
-        activeTargets[triangleKey] = newTarget;  // ✅ Keep all active targets
+        activeTargets[triangleKey] = newTarget;
     
         io.emit('newTarget', { triangle: newTarget });
     }, 750);
