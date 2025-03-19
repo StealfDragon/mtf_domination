@@ -227,7 +227,7 @@
         "country": "USSR",
         "num": 5,
         "scaleFactor": 3.6,
-        "xOffset" : 0,
+        "xOffset" : 10,
         "comment" : "no x",
         "yOffset" : -50,
         "zoomFactor" : 0,
