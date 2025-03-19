@@ -80,6 +80,7 @@ class Menu extends Phaser.Scene {
                 */
         });
 
+        /*
         if (this.playerNumber) {
             let text = (this.playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
             console.log("Received Player Number, setting text:", text);
@@ -93,6 +94,7 @@ class Menu extends Phaser.Scene {
                 }).setOrigin(0.5);
             }
         }
+            */
 
         socket.on('full', () => {
             console.log("Game is full! Redirecting...");
@@ -112,7 +114,7 @@ class Menu extends Phaser.Scene {
 
         socket.emit('resetGame');
     }
-    
+
     updateReadyText() {
         if (this.playerNumber) {
             this.readyText.setText(`Player ${this.playerNumber}: Press SPACE to Ready`);
