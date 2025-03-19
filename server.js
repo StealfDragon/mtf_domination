@@ -144,6 +144,15 @@ io.on('connection', (socket) => {
         });
     });
 
+    if (playerScores[playerNumber] >= 8000) {
+        console.log(`Player ${playerNumber} won the game!`);
+        io.emit('gameOver', { winner: playerNumber });
+    }
+
+    socket.on('playerFailedQTE', (data) => {
+        io.emit('gameOver', { winner: data.opponent, loser: data.player });
+    });
+
     /*
     socket.on('hitTriangle', (data) => {
         let triangleKey = JSON.stringify(data.triangle); // Unique identifier for the triangle
@@ -166,4 +175,13 @@ io.on('connection', (socket) => {
         }
         players[playerNumber] = null; // Free the slot for rejoining players
     });
+
+    socket.on('resetGame', () => {
+        validTriangles = [];
+        activeTargets = {};
+        playerScores = { 1: 0, 2: 0 };
+        readyPlayers = 0;
+        console.log("Game reset!");
+    });
+    
 });
