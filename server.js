@@ -90,6 +90,7 @@ io.on('connection', (socket) => {
     });
 
     setInterval(() => {
+        /*
         if (validTriangles.length === 0) return;
 
         let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
@@ -100,7 +101,24 @@ io.on('connection', (socket) => {
         activeTargets[JSON.stringify(newTarget)] = newTarget;  // ✅ Store multiple active targets
 
         io.emit('newTarget', { triangle: newTarget });
-    }, 5000);
+        */
+        if (validTriangles.length === 0) return;
+
+        // Check if an active target already exists
+        if (Object.keys(activeTargets).length > 0) {
+            return;
+        }
+    
+        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
+        if (availableTriangles.length === 0) return;
+    
+        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
+        let triangleKey = JSON.stringify(newTarget);
+    
+        activeTargets[triangleKey] = newTarget;  // ✅ Store new target but do NOT remove old one
+    
+        io.emit('newTarget', { triangle: newTarget });
+    }, 750);
 
     socket.on('moveReticle', (data) => {
         io.emit('moveReticle', data); // Broadcast movement to all players
