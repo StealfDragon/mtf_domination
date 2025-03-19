@@ -185,12 +185,33 @@ class Play extends Phaser.Scene {
         });
 
         socket.on('newTarget', (data) => {
+            let centerX = (data.triangle.x1 + data.triangle.x2 + data.triangle.x3) / 3;
+            let centerY = (data.triangle.y1 + data.triangle.y2 + data.triangle.y3) / 3;
+
+            let target = this.add.circle(centerX, centerY, 5, 0xffffff);
+            target.triangleKey = JSON.stringify(data.triangle); // Associate with triangle
+
+            this.targetPoints.push(target); // Store reference
+            /*
             this.activeTarget = data.triangle;
         
             let centerX = (data.triangle.x1 + data.triangle.x2 + data.triangle.x3) / 3;
             let centerY = (data.triangle.y1 + data.triangle.y2 + data.triangle.y3) / 3;
         
             this.targetPoint.setPosition(centerX, centerY).setVisible(true);
+            */
+        });
+
+        socket.on('removeTarget', (data) => {
+            let triangleKey = JSON.stringify(data.triangle);
+        
+            this.targetPoints = this.targetPoints.filter(target => {
+                if (target.triangleKey === triangleKey) {
+                    target.destroy();
+                    return false;
+                }
+                return true;
+            });
         });
         
         setTimeout(() => {
