@@ -29,14 +29,14 @@ class Menu extends Phaser.Scene {
         
 
         // Add instructions under the ready prompt
-        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them.\nBut watch out!Every so often, you'll get a shock\n(a quick time event, which is a game over if lost)\nFirst person to reach 8000 points wins.\n\nPress SPACE to shoot and use ARROW KEYS to move the reticle\npress SHIFT for QTEs", {
+        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them.\nBut watch out!Every so often, you'll get a shock\n(a quick time event, which is a game over if lost)\nFirst person to reach 8000 points wins.\n\nPress SPACE to shoot and use ARROW KEYS to move the reticle\nPress SHIFT for QTEs", {
             fontSize: "18px",
             fill: "#cccccc",
             align: "center"
         }).setOrigin(0.5);
 
         // Add credits at the bottom
-        this.add.text(400, 550, "Created by Cassian Jones and Evan Lara\nWith some server code from Jerome Renaux\nand sound assets from RibhavAgrawal on Pixabay", {
+        this.add.text(400, 550, "Created by Cassian Jones and Evan Lara\nWith some server code from Jerome Renaux\nAnd sound assets from RibhavAgrawal on Pixabay", {
             fontSize: "18px",
             fill: "#999999",
             align: "center"
