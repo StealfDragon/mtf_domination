@@ -20,6 +20,8 @@ class Play extends Phaser.Scene {
         this.xOffset = this.selectedMap.xOffset
         this.yOffset = this.selectedMap.yOffset
 
+        this.targetPoints = [];
+
         const adjustedPoints = [];
         for (let i = 0; i < this.selectedMap.points.length; i += 2) {
             let x = (this.selectedMap.points[i] * this.selectedMap.scaleFactor) + this.xOffset;
