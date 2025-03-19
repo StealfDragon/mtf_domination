@@ -39,7 +39,8 @@ class Menu extends Phaser.Scene {
         // Add credits at the bottom
         this.add.text(400, 550, "Created by Cassian Jones and Evan Lara\nWith some server code from jerome renaux\nand sound assets from RibhavAgrawal on Pixabay", {
             fontSize: "18px",
-            fill: "#999999"
+            fill: "#999999",
+            align: "center"
         }).setOrigin(0.5);
 
         socket.on('assignPlayerNumber', (num) => {
@@ -83,8 +84,8 @@ class Menu extends Phaser.Scene {
                 */
         });
 
-        if (playerNumber) {
-            let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+        if (this.playerNumber) {
+            let text = (this.playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
             console.log("Received Player Number, setting text:", text);
 
             if (this.readyText) {
