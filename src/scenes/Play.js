@@ -39,8 +39,16 @@ class Play extends Phaser.Scene {
         this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
         this.graphics.strokePoints(this.countryOutline.points, true)
 
+        this.triangleDots = new Map(); // Track which triangles have dots
         this.triangles = this.triangulateCountry(this.countryOutline)
         this.drawTriangles(this, this.triangles)
+
+        this.time.addEvent({
+    delay: 750, // Every 0.75 seconds
+    callback: this.spawnDot,
+    callbackScope: this,
+    loop: true
+});
 
         this.playerScores = { 1: 0, 2: 0 }; // Store both player scores
 
@@ -147,19 +155,38 @@ class Play extends Phaser.Scene {
                 delete this.reticles[id];
             }
         });
-
         socket.on('hitTriangle', (data) => {
-            let triangleKey = JSON.stringify(data.triangle);
+    let triangleKey = JSON.stringify(data.triangle);
+
+    // Check if the triangle had a dot and remove it
+    let triangle = this.triangles.find(t => JSON.stringify(t) === triangleKey);
+    if (triangle && this.triangleDots.has(triangle)) {
+        this.triangleDots.get(triangle).destroy(); // Remove the dot from the scene
+        this.triangleDots.delete(triangle); // Remove reference from tracking map
+    }
+
+    if (!this.triangleHits[triangleKey]) {
+        this.triangleHits[triangleKey] = data.hits;
+
+        this.playerScores = data.scores;
+        this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+        this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+
+        this.colorTriangle(data.triangle, data.playerNumber);
+    }
+});
+        //socket.on('hitTriangle', (data) => {
+            //let triangleKey = JSON.stringify(data.triangle);
         
-            if (!this.triangleHits[triangleKey]) {
-                this.triangleHits[triangleKey] = data.hits;
+            //if (!this.triangleHits[triangleKey]) {
+                //this.triangleHits[triangleKey] = data.hits;
         
-                this.playerScores = data.scores;
-                this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
-                this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
+                //this.playerScores = data.scores;
+                //this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
+                //this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
         
-                this.colorTriangle(data.triangle, data.playerNumber);
-            }
+                //this.colorTriangle(data.triangle, data.playerNumber);
+            //}
 
             /*
             if (!this.triangleHits[triangleKey]) {
@@ -170,7 +197,7 @@ class Play extends Phaser.Scene {
                 graphics.fillTriangleShape(data.triangle);
             }
             */
-        });
+        //});
 
         // Create the reticle for THIS player
         // this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
@@ -454,29 +481,48 @@ class Play extends Phaser.Scene {
     //             */
     //     }
     // }
+    spawnDot() {
+    let availableTriangles = this.triangles.filter(triangle => !this.triangleDots.has(triangle));
 
-    spawnTarget() {
+    if (availableTriangles.length === 0) {
+        console.log("All triangles are occupied.");
+        return;
+    }
+
+    let chosenTriangle = Phaser.Utils.Array.GetRandom(availableTriangles); // Pick a random triangle
+
+    // Calculate the center of the triangle
+    let centerX = (chosenTriangle.x1 + chosenTriangle.x2 + chosenTriangle.x3) / 3;
+    let centerY = (chosenTriangle.y1 + chosenTriangle.y2 + chosenTriangle.y3) / 3;
+
+    // Create a dot at the center of the triangle
+    let dot = this.add.circle(centerX, centerY, 5, 0xffffff);
+
+    // Store the dot reference
+    this.triangleDots.set(chosenTriangle, dot);
+}
+    //spawnTarget() {
         // Filter out already shot triangles
-        let availableTriangles = this.validTriangles.filter(triangle => this.triangleHits.get(triangle) < 4);
+        //let availableTriangles = this.validTriangles.filter(triangle => this.triangleHits.get(triangle) < 4);
     
         // If no triangles remain, stop spawning targets
-        if (availableTriangles.length === 0) {
-            console.log("No more valid targets.");
-            this.targetPoint.setVisible(false);
-            return;
-        }
+        //if (availableTriangles.length === 0) {
+            //console.log("No more valid targets.");
+            //this.targetPoint.setVisible(false);
+            //return;
+  // }
     
         // Pick a random triangle from available ones
-        let randomTriangle = Phaser.Utils.Array.GetRandom(availableTriangles);
-        this.activeTarget = randomTriangle; // Store active target
+        //let randomTriangle = Phaser.Utils.Array.GetRandom(availableTriangles);
+        //this.activeTarget = randomTriangle; // Store active target
     
         // Calculate triangle center
-        let centerX = (randomTriangle.x1 + randomTriangle.x2 + randomTriangle.x3) / 3;
-        let centerY = (randomTriangle.y1 + randomTriangle.y2 + randomTriangle.y3) / 3;
+        //let centerX = (randomTriangle.x1 + randomTriangle.x2 + randomTriangle.x3) / 3;
+        //let centerY = (randomTriangle.y1 + randomTriangle.y2 + randomTriangle.y3) / 3;
     
         // Move the target point to the new location and make it visible
-        this.targetPoint.setPosition(centerX, centerY).setVisible(true);
-    }
+        //this.targetPoint.setPosition(centerX, centerY).setVisible(true);
+    //}
 
 
     // startQTE() {
