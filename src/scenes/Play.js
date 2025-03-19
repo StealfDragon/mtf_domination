@@ -194,7 +194,7 @@ class Play extends Phaser.Scene {
         });
 
         socket.on('gameOver', (data) => {
-            this.scene.start('GameOverScene', { winner: data.winner, loser: data.loser, playerNumber: this.playerNumber });
+            this.scene.start('GameOver', { winner: data.winner, loser: data.loser, playerNumber: this.playerNumber });
         });
         
         setTimeout(() => {
