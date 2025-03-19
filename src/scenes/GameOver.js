@@ -15,6 +15,25 @@ class GameOver extends Phaser.Scene {
             fill: (playerNumber === winner) ? '#00ff00' : '#ff0000'
         }).setOrigin(0.5);
 
+        let text = "Press SPACE to go to Menu"
+
+        //this.add.text(400, 500, text).setOrigin(0.5)
+
+        this.readyText.setText(text);
+        this.readyText = this.add.text(400, 300, text, {
+            fontSize: "24px",
+            fill: "#ffffff"
+        }).setOrigin(0.5);
+
+        this.input.keyboard.on('keydown-SPACE', () => {
+            if (!this.isReady) {
+                this.isReady = true;
+                socket.emit('playerReady');
+                this.readyText.setText("Waiting for other Player...");
+            }
+        });
+
+        /*
         let menuButton = this.add.text(400, 400, 'Return to Menu', {
             fontSize: '32px',
             fill: '#ffffff'
@@ -23,5 +42,6 @@ class GameOver extends Phaser.Scene {
         menuButton.on('pointerdown', () => {
             this.scene.start('Menu');
         });
+        */
     }
 }

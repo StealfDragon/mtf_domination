@@ -16,10 +16,36 @@ class Menu extends Phaser.Scene {
         this.playerNumber = null; // Will be assigned later
         this.isReady = false;
 
+        this.add.text(400, 100, "DOMINATION", {
+            fontSize: "48px",
+            fontStyle: "bold",
+            fill: "#ffffff"
+        }).setOrigin(0.5);
+
+        // Always show the ready text, even if player number isn't assigned yet
+        this.readyText = this.add.text(400, 300, "Press SPACE to Ready", {
+            fontSize: "24px",
+            fill: "#ffffff"
+        }).setOrigin(0.5);
+
+        // Add instructions under the ready prompt
+        this.add.text(400, 400, "Instructions: shoot the triangle regions when a target appears in them.\nBut watch out! Every so often, you'll get a shock (a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
+            fontSize: "18px",
+            fill: "#cccccc",
+            align: "center"
+        }).setOrigin(0.5);
+
+        // Add credits at the bottom
+        this.add.text(400, 550, "Created by Cassian Jones and Evan Lara", {
+            fontSize: "18px",
+            fill: "#999999"
+        }).setOrigin(0.5);
+
         socket.on('assignPlayerNumber', (num) => {
             this.playerNumber = num;
             console.log(`You are Player ${num}`);
-
+            
+            /*
             let text = (num === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
             console.log("Received Player Number, setting text:", text);
 
@@ -31,7 +57,20 @@ class Menu extends Phaser.Scene {
                     fill: "#ffffff"
                 }).setOrigin(0.5);
             }
+            */
         });
+
+        let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+            console.log("Received Player Number, setting text:", text);
+
+        if (this.readyText) {
+            this.readyText.setText(text);
+        } else {
+            this.readyText = this.add.text(400, 300, text, {
+                fontSize: "24px",
+                fill: "#ffffff"
+            }).setOrigin(0.5);
+        }
 
         socket.on('startGame', (serverData) => {
             console.log("Game starting...");
