@@ -92,25 +92,12 @@ io.on('connection', (socket) => {
     setInterval(() => {
         if (validTriangles.length === 0) return;
 
-        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
-        if (availableTriangles.length === 0) return;
-
-        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
-        let triangleKey = JSON.stringify(newTarget);
-
-        activeTargets[triangleKey] = newTarget; // Store active target
-
-        io.emit('newTarget', { triangle: newTarget });
-        /*
-        if (validTriangles.length === 0) return;
-
         let availableTriangles = validTriangles.filter(t => !triangleHits[JSON.stringify(t)]);
         if (availableTriangles.length === 0) return;
 
         activeTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
 
         io.emit('newTarget', { triangle: activeTarget });
-        */
     }, 5000);
 
     socket.on('moveReticle', (data) => {
@@ -130,7 +117,6 @@ io.on('connection', (socket) => {
         }
     
         triangleHits[triangleKey]++; // Increase hit count
-        delete activeTargets[triangleKey];
 
         if (triangleHits[triangleKey] >= 4) {
             validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
@@ -156,8 +142,6 @@ io.on('connection', (socket) => {
             playerNumber: playerNumber, // Send the player number for coloring
             scores: { ...playerScores} // Send full score data
         });
-        
-        io.emit('removeTarget', { triangle: data.triangle });
     });
 
     /*
