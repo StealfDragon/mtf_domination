@@ -173,8 +173,7 @@ class Play extends Phaser.Scene {
             }
         
             // Mark the triangle as hit
-            this.triangleHits[triangleKey] = (this.triangleHits[triangleKey] || 0) + 1;
-        
+            this.triangleHits.set(triangle, (this.triangleHits.get(triangle) || 0) + 1);        
             // Update scores
             this.playerScores = data.scores;
             this.player1ScoreText.setText(`P1 Score: ${this.playerScores[1]}`);
