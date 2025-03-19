@@ -21,7 +21,7 @@ class GameOver extends Phaser.Scene {
         }).setOrigin(0.5).setInteractive();
 
         menuButton.on('pointerdown', () => {
-            this.scene.start('MenuScene');
+            this.scene.start('Menu');
         });
     }
 }
