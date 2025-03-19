@@ -25,7 +25,7 @@ server.listen(8081, '0.0.0.0', () => {
 });
 
 let validTriangles = []; // Will be populated when game starts
-let activeTarget = null; // Store the currently active target
+let activeTargets = {};
 let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
 let triangleHits = {};
