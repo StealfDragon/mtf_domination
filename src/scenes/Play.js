@@ -9,7 +9,7 @@ class Play extends Phaser.Scene {
         
         this.selectedMap = data.selectedMap;
         //console.log(`Server chose map: ${this.selectedMap.country}`);
-    
+
         if (!this.selectedMap || !this.selectedMap.points) {
             console.error("No map data received from server!");
             return;
@@ -17,12 +17,15 @@ class Play extends Phaser.Scene {
     
         console.log(`Server chose map: ${this.selectedMap.country}`);
 
-        const scaledPoints = this.selectedMap.points.map(val => 
-            val * this.selectedMap.scaleFactor
+        this.xOffset = this.selectedMap.xOffset
+        this.yOffset = this.selectedMap.yOffset
+
+        const adjustedPoints = this.selectedMap.points.map(val => 
+            (val * this.selectedMap.scaleFactor) + (i % 2 === 0 ? xOffset : yOffset)
         );
 
         // Create polygon
-        this.countryOutline = new Phaser.Geom.Polygon(scaledPoints);
+        this.countryOutline = new Phaser.Geom.Polygon(adjustedPoints);
 
         this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
         this.graphics.strokePoints(this.countryOutline.points, true)
