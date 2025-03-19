@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
         activeTargets[triangleKey] = newTarget;
     
         io.emit('newTarget', { triangle: newTarget });
-    }, 750);
+    }, 5000);
 
     socket.on('moveReticle', (data) => {
         io.emit('moveReticle', data); // Broadcast movement to all players
