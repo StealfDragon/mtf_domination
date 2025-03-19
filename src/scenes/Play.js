@@ -39,6 +39,7 @@ class Play extends Phaser.Scene {
         this.graphics = this.add.graphics({ lineStyle: { width: 3, color: 0xf5ad42 } });
         this.graphics.strokePoints(this.countryOutline.points, true)
 
+        this.triangleDots = new Map(); // Track which triangles have dots
         this.triangles = this.triangulateCountry(this.countryOutline)
         this.drawTriangles(this, this.triangles)
 
