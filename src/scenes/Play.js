@@ -199,7 +199,7 @@ class Play extends Phaser.Scene {
             }
             */
         //});
-        });
+        // });
 
         // Create the reticle for THIS player
         // this.reticles[socket.id] = this.add.image(400, 300, 'reticle');
