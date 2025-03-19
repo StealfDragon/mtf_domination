@@ -489,48 +489,48 @@ class Play extends Phaser.Scene {
     //             */
     //     }
     // }
-    spawnDot() {
-    let availableTriangles = this.triangles.filter(triangle => !this.triangleDots.has(triangle));
+//     spawnDot() {
+//     let availableTriangles = this.triangles.filter(triangle => !this.triangleDots.has(triangle));
 
-    if (availableTriangles.length === 0) {
-        console.log("All triangles are occupied.");
-        return;
+//     if (availableTriangles.length === 0) {
+//         console.log("All triangles are occupied.");
+//         return;
+//     }
+
+//     let chosenTriangle = Phaser.Utils.Array.GetRandom(availableTriangles); // Pick a random triangle
+
+//     // Calculate the center of the triangle
+//     let centerX = (chosenTriangle.x1 + chosenTriangle.x2 + chosenTriangle.x3) / 3;
+//     let centerY = (chosenTriangle.y1 + chosenTriangle.y2 + chosenTriangle.y3) / 3;
+
+//     // Create a dot at the center of the triangle
+//     let dot = this.add.circle(centerX, centerY, 5, 0xffffff);
+
+//     // Store the dot reference
+//     this.triangleDots.set(chosenTriangle, dot);
+// }
+    spawnTarget() {
+        //Filter out already shot triangles
+        let availableTriangles = this.validTriangles.filter(triangle => this.triangleHits.get(triangle) < 4);
+    
+        //If no triangles remain, stop spawning targets
+        if (availableTriangles.length === 0) {
+            console.log("No more valid targets.");
+            this.targetPoint.setVisible(false);
+            return;
+  }
+    
+       // Pick a random triangle from available ones
+        let randomTriangle = Phaser.Utils.Array.GetRandom(availableTriangles);
+        this.activeTarget = randomTriangle; // Store active target
+    
+        //Calculate triangle center
+        let centerX = (randomTriangle.x1 + randomTriangle.x2 + randomTriangle.x3) / 3;
+        let centerY = (randomTriangle.y1 + randomTriangle.y2 + randomTriangle.y3) / 3;
+    
+        //Move the target point to the new location and make it visible
+        this.targetPoint.setPosition(centerX, centerY).setVisible(true);
     }
-
-    let chosenTriangle = Phaser.Utils.Array.GetRandom(availableTriangles); // Pick a random triangle
-
-    // Calculate the center of the triangle
-    let centerX = (chosenTriangle.x1 + chosenTriangle.x2 + chosenTriangle.x3) / 3;
-    let centerY = (chosenTriangle.y1 + chosenTriangle.y2 + chosenTriangle.y3) / 3;
-
-    // Create a dot at the center of the triangle
-    let dot = this.add.circle(centerX, centerY, 5, 0xffffff);
-
-    // Store the dot reference
-    this.triangleDots.set(chosenTriangle, dot);
-}
-    //spawnTarget() {
-        // Filter out already shot triangles
-        //let availableTriangles = this.validTriangles.filter(triangle => this.triangleHits.get(triangle) < 4);
-    
-        // If no triangles remain, stop spawning targets
-        //if (availableTriangles.length === 0) {
-            //console.log("No more valid targets.");
-            //this.targetPoint.setVisible(false);
-            //return;
-  // }
-    
-        // Pick a random triangle from available ones
-        //let randomTriangle = Phaser.Utils.Array.GetRandom(availableTriangles);
-        //this.activeTarget = randomTriangle; // Store active target
-    
-        // Calculate triangle center
-        //let centerX = (randomTriangle.x1 + randomTriangle.x2 + randomTriangle.x3) / 3;
-        //let centerY = (randomTriangle.y1 + randomTriangle.y2 + randomTriangle.y3) / 3;
-    
-        // Move the target point to the new location and make it visible
-        //this.targetPoint.setPosition(centerX, centerY).setVisible(true);
-    //}
 
 
     // startQTE() {
