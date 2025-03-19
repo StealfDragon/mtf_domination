@@ -149,18 +149,6 @@ io.on('connection', (socket) => {
         io.emit('removeTarget', { triangle: data.triangle });
     });
 
-    socket.on('removeTarget', (data) => {
-        let triangleKey = JSON.stringify(data.triangle);
-    
-        this.targetPoints = this.targetPoints.filter(target => {
-            if (target.triangleKey === triangleKey) {
-                target.destroy();
-                return false;
-            }
-            return true;
-        });
-    });
-
     socket.on('disconnect', () => {
         console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
         if (players[playerNumber] && players[playerNumber].ready) {
