@@ -92,12 +92,14 @@ io.on('connection', (socket) => {
     setInterval(() => {
         if (validTriangles.length === 0) return;
 
-        let availableTriangles = validTriangles.filter(t => !triangleHits[JSON.stringify(t)]);
+        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
         if (availableTriangles.length === 0) return;
 
-        activeTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
+        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
 
-        io.emit('newTarget', { triangle: activeTarget });
+        activeTargets[JSON.stringify(newTarget)] = newTarget;  // ✅ Store multiple active targets
+
+        io.emit('newTarget', { triangle: newTarget });
     }, 5000);
 
     socket.on('moveReticle', (data) => {
@@ -118,7 +120,8 @@ io.on('connection', (socket) => {
     
         triangleHits[triangleKey]++; // Increase hit count
 
-        if (triangleHits[triangleKey] >= 4) {
+        if (triangleHits[triangleKey] >= 1) {
+            delete activeTargets[triangleKey];
             validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
         }
 
@@ -142,22 +145,21 @@ io.on('connection', (socket) => {
             playerNumber: playerNumber, // Send the player number for coloring
             scores: { ...playerScores} // Send full score data
         });
+
+        io.emit('removeTarget', { triangle: data.triangle });
     });
 
-    /*
-    socket.on('hitTriangle', (data) => {
-        let triangleKey = JSON.stringify(data.triangle); // Unique identifier for the triangle
+    socket.on('removeTarget', (data) => {
+        let triangleKey = JSON.stringify(data.triangle);
     
-        if (!triangleHits[triangleKey]) {
-            triangleHits[triangleKey] = 0; // Initialize hit count
-        }
-    
-        if (triangleHits[triangleKey] < 1) { // Only allow one hit
-            triangleHits[triangleKey]++;
-            io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
-        }
+        this.targetPoints = this.targetPoints.filter(target => {
+            if (target.triangleKey === triangleKey) {
+                target.destroy();
+                return false;
+            }
+            return true;
+        });
     });
-    */
 
     socket.on('disconnect', () => {
         console.log(`Player ${playerNumber} disconnected: ${socket.id}`);
