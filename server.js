@@ -25,7 +25,7 @@ server.listen(8081, '0.0.0.0', () => {
 });
 
 let validTriangles = []; // Will be populated when game starts
-let activeTargets = {};
+let activeTarget = null; // Store the currently active target
 let players = { 1: null, 2: null }; // Track two player slots
 let readyPlayers = 0;
 let triangleHits = {};
@@ -90,35 +90,14 @@ io.on('connection', (socket) => {
     });
 
     setInterval(() => {
-        /*
         if (validTriangles.length === 0) return;
 
-        // Check if an active target already exists
-        if (Object.keys(activeTargets).length > 0) {
-            return;
-        }
-    
-        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
+        let availableTriangles = validTriangles.filter(t => !triangleHits[JSON.stringify(t)]);
         if (availableTriangles.length === 0) return;
-    
-        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
-        let triangleKey = JSON.stringify(newTarget);
-    
-        activeTargets[triangleKey] = newTarget;  // ✅ Store new target but do NOT remove old one
-    
-        io.emit('newTarget', { triangle: newTarget });
-        */
-        if (validTriangles.length === 0) return;
 
-        let availableTriangles = validTriangles.filter(t => !activeTargets[JSON.stringify(t)]);
-        if (availableTriangles.length === 0) return;
-    
-        let newTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
-        let triangleKey = JSON.stringify(newTarget);
-    
-        activeTargets[triangleKey] = newTarget;
-    
-        io.emit('newTarget', { triangle: newTarget });
+        activeTarget = availableTriangles[Math.floor(Math.random() * availableTriangles.length)];
+
+        io.emit('newTarget', { triangle: activeTarget });
     }, 5000);
 
     socket.on('moveReticle', (data) => {
@@ -139,8 +118,9 @@ io.on('connection', (socket) => {
     
         triangleHits[triangleKey]++; // Increase hit count
 
-        delete activeTargets[triangleKey];
-        validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
+        if (triangleHits[triangleKey] >= 4) {
+            validTriangles = validTriangles.filter(t => JSON.stringify(t) !== triangleKey);
+        }
 
         let p1 = data.triangle.x1, p2 = data.triangle.y1;
         let p3 = data.triangle.x2, p4 = data.triangle.y2;
@@ -162,9 +142,22 @@ io.on('connection', (socket) => {
             playerNumber: playerNumber, // Send the player number for coloring
             scores: { ...playerScores} // Send full score data
         });
-
-        io.emit('removeTarget', { triangle: data.triangle });
     });
+
+    /*
+    socket.on('hitTriangle', (data) => {
+        let triangleKey = JSON.stringify(data.triangle); // Unique identifier for the triangle
+    
+        if (!triangleHits[triangleKey]) {
+            triangleHits[triangleKey] = 0; // Initialize hit count
+        }
+    
+        if (triangleHits[triangleKey] < 1) { // Only allow one hit
+            triangleHits[triangleKey]++;
+            io.emit('hitTriangle', { triangle: data.triangle, hits: triangleHits[triangleKey] });
+        }
+    });
+    */
 
     socket.on('disconnect', () => {
         console.log(`Player ${playerNumber} disconnected: ${socket.id}`);

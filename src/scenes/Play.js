@@ -148,18 +148,6 @@ class Play extends Phaser.Scene {
             }
         });
 
-        socket.on('removeTarget', (data) => {
-            let triangleKey = JSON.stringify(data.triangle);
-        
-            this.targetPoints = this.targetPoints.filter(target => {
-                if (target.triangleKey === triangleKey) {
-                    target.destroy();
-                    return false;
-                }
-                return true;
-            });
-        });
-
         socket.on('hitTriangle', (data) => {
             let triangleKey = JSON.stringify(data.triangle);
         
@@ -197,34 +185,12 @@ class Play extends Phaser.Scene {
         });
 
         socket.on('newTarget', (data) => {
-            /*
             this.activeTarget = data.triangle;
         
             let centerX = (data.triangle.x1 + data.triangle.x2 + data.triangle.x3) / 3;
             let centerY = (data.triangle.y1 + data.triangle.y2 + data.triangle.y3) / 3;
         
             this.targetPoint.setPosition(centerX, centerY).setVisible(true);
-            */
-            let triangleKey = JSON.stringify(data.triangle);
-
-            // ✅ If targetPoints array doesn't exist, initialize it
-            if (!this.targetPoints) {
-                this.targetPoints = [];
-            }
-        
-            // ✅ Check if a circle already exists for this triangle
-            let existingCircle = this.targetPoints.find(target => target.triangleKey === triangleKey);
-            if (existingCircle) return; // Prevent duplicate circles
-        
-            // ✅ Calculate center of the triangle
-            let centerX = (data.triangle.x1 + data.triangle.x2 + data.triangle.x3) / 3;
-            let centerY = (data.triangle.y1 + data.triangle.y2 + data.triangle.y3) / 3;
-        
-            // ✅ Create the new circle and store it
-            let newCircle = this.add.circle(centerX, centerY, 5, 0xffffff).setVisible(true);
-            newCircle.triangleKey = triangleKey;
-        
-            this.targetPoints.push(newCircle);
         });
         
         setTimeout(() => {
