@@ -21,24 +21,6 @@ class Play extends Phaser.Scene {
             val * this.selectedMap.scaleFactor
         );
 
-        /*
-        this.maps = this.cache.json.get('mapData')
-
-        this.selectedMap = this.getRandomMap();
-
-        // Scale the points using the scaleFactor
-        const scaledPoints = this.selectedMap.points.map((val, i) => 
-            val * this.selectedMap.scaleFactor
-        );
-
-        
-        const scaleFactor = selectedMap.scaleFactor;
-
-        // Scale the points dynamically
-        const scaledPoints = selectedMap.points.map((val, i) =>
-            i % 2 === 0 ? val * scaleFactor : val * scaleFactor
-        );
-        */
         // Create polygon
         this.countryOutline = new Phaser.Geom.Polygon(scaledPoints);
 
