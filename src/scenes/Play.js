@@ -192,6 +192,10 @@ class Play extends Phaser.Scene {
         
             this.targetPoint.setPosition(centerX, centerY).setVisible(true);
         });
+
+        socket.on('gameOver', (data) => {
+            this.scene.start('GameOverScene', { winner: data.winner, loser: data.loser, playerNumber: this.playerNumber });
+        });
         
         setTimeout(() => {
             socket.emit('sendTriangles', { triangles: this.triangles });
@@ -258,7 +262,8 @@ class Play extends Phaser.Scene {
         if (this.cursors.down.isDown) this.reticle.y += speed;
 
         if (this.qteActive) {
-            let speed = 8; // Adjust speed for difficulty
+            //let speed = 8; // Adjust speed for difficulty
+            this.qteSpeed = Phaser.Math.Between(4, 7); // Slow & random QTE speed
             this.qteMarker.x += this.qteDirection * speed;
     
             // Reverse direction if hitting the edge of the QTE bar
@@ -375,7 +380,8 @@ class Play extends Phaser.Scene {
             this.player2ScoreText.setText(`P2 Score: ${this.playerScores[2]}`);
         } else {
             console.log("Player Failed the QTE!");
-            // Punish the player (optional)
+            socket.emit('playerFailedQTE', { player: this.playerNumber, opponent: this.playerNumber === 1 ? 2 : 1 });
+            //this.scene.start('GameOverScene', { winner: this.playerNumber === 1 ? 2 : 1, loser: this.playerNumber });
         }
     
         // Schedule the next QTE randomly
