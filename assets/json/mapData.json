@@ -95,9 +95,9 @@
     {
         "country": "Japan",
         "num": 2,
-        "scaleFactor": 2.7,
+        "scaleFactor": 2.8,
         "xOffset" : 100,
-        "yOffset" : 100,
+        "yOffset" : 50,
         "zoomFactor" : 0,
         "points": [
             166.38623, 1.25403, 176.76281, 0.00004,
@@ -149,7 +149,7 @@
         "scaleFactor": 3.7,
         "xOffset" : 0,
         "comment" : "no x",
-        "yOffset" : -75,
+        "yOffset" : -60,
         "zoomFactor" : 0,
         "points": [
             33.492215, 34.319183, 42.037552, 38.178369, 58.846238, 38.521539, 
