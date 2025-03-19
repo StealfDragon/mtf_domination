@@ -22,21 +22,22 @@ class Menu extends Phaser.Scene {
             fill: "#ffffff"
         }).setOrigin(0.5);
 
-        // Always show the ready text, even if player number isn't assigned yet
+        /*
         this.readyText = this.add.text(400, 300, "Press SPACE to Ready", {
             fontSize: "24px",
             fill: "#ffffff"
         }).setOrigin(0.5);
+        */
 
         // Add instructions under the ready prompt
-        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them. But watch out!\nEvery so often, you'll get a shock (a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
+        this.add.text(400, 400, "Instructions:\nShoot the triangle regions when a target appears in them. But watch out!\nEvery so often, you'll get a shock\n(a quick time event, which is a game over if lost).\nFirst person to reach 8000 points wins.", {
             fontSize: "18px",
             fill: "#cccccc",
             align: "center"
         }).setOrigin(0.5);
 
         // Add credits at the bottom
-        this.add.text(400, 550, "Created by Cassian Jones and Evan Lara", {
+        this.add.text(400, 550, "Created by Cassian Jones and Evan Lara\nWith some server code from jerome renaux\nand sound assets from RibhavAgrawal on Pixabay", {
             fontSize: "18px",
             fill: "#999999"
         }).setOrigin(0.5);
@@ -66,18 +67,34 @@ class Menu extends Phaser.Scene {
                 playerNumber: this.playerNumber, 
                 selectedMap: serverData.selectedMap 
             });
-        });
 
-        let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+            /*
+            let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
             console.log("Received Player Number, setting text:", text);
 
-        if (this.readyText) {
-            this.readyText.setText(text);
-        } else {
-            this.readyText = this.add.text(400, 300, text, {
-                fontSize: "24px",
-                fill: "#ffffff"
-            }).setOrigin(0.5);
+            if (this.readyText) {
+                this.readyText.setText(text);
+            } else {
+                this.readyText = this.add.text(400, 300, text, {
+                    fontSize: "24px",
+                    fill: "#ffffff"
+                }).setOrigin(0.5);
+            }
+                */
+        });
+
+        if (playerNumber) {
+            let text = (playerNumber === 1) ? "Player 1: Press SPACE to Ready" : "Player 2: Press SPACE to Ready";
+            console.log("Received Player Number, setting text:", text);
+
+            if (this.readyText) {
+                this.readyText.setText(text);
+            } else {
+                this.readyText = this.add.text(400, 300, text, {
+                    fontSize: "24px",
+                    fill: "#ffffff"
+                }).setOrigin(0.5);
+            }
         }
 
         socket.on('full', () => {
